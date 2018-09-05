@@ -1,6 +1,6 @@
 (define (run-benchmark)
   (let ([size : Dyn (read-int)])
-    (let ([a : Dyn (vector size 1)])
+    (let ([a : Dyn (vector size (: 1 Dyn))])
       (letrec ([sort : Dyn
                      (lambda ([a : Dyn] [p : Dyn] [r : Dyn])
                        (if (< p r)
@@ -11,7 +11,7 @@
                            ()))]
                [partition : Dyn
                           (lambda ([a : Dyn] [p : Dyn] [r : Dyn])
-                            (let ([i : Dyn (box (- p 1))]
+                            (let ([i : Dyn (box (: (- p 1) Dyn))]
                                   [x : Dyn (vector-ref a r)])
                               (begin
                                 (repeat (j p r) (_ ())

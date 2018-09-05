@@ -6,7 +6,7 @@
 (define (make-body [x : Float] [y : Float] [z : Float]
                    [vx : Float] [vy : Float] [vz : Float]
                    [mass : Float]) : (Vect Float)
-  (let ([v : (Vect Float) (vector 7 #i0.0)])
+  (let ([v : (Vect Float) (vector 7 (: #i0.0 Float))])
     (begin (vector-set! v 0 x)
            (vector-set! v 1 y)
            (vector-set! v 2 z)
@@ -98,7 +98,7 @@
              (fl* #i5.15138902046611451e-05 solar-mass)))
 
 (define *system* : (Vect (Vect Float))
-  (let ([v : (Vect (Vect Float)) (vector 5 (vector 0 #i0.0))])
+  (let ([v : (Vect (Vect Float)) (vector 5 (: (vector 0 (: #i0.0 Float)) (Vect Float)))])
    (begin (vector-set! v 0 *sun*)
      	  (vector-set! v 1 *jupiter*)
 	  (vector-set! v 2 *saturn*)
@@ -128,9 +128,6 @@
        (fl+ px (fl* (vector-ref j 3) (vector-ref j 6)))
        (fl+ py (fl* (vector-ref j 4) (vector-ref j 6)))
        (fl+ pz (fl* (vector-ref j 5) (vector-ref j 6)))))))
-				 
-
-
 
 ;; -------------------------------
 (define (energy) : Float
@@ -147,7 +144,6 @@
           (let ([e : Float (fl+ e (fl* (fl* 0.5 (vector-ref o1 6)) sqs))])
             (energy-loop-i o o1 (+ o 1) e))))))
 
-
 (define (energy-loop-i [o : Int] [o1 : (Vect Float)] [i : Int]  [e : Float])
   : Float
   (if (= i *system-size*)
@@ -162,8 +158,8 @@
                                               (vector-ref i1 6))
                                          dist))])
               (energy-loop-i o o1 (+ i 1) e)))))))
-;; ;; -------------------------------
 
+;; ;; -------------------------------
 
 (define (advance) : Unit
   (advance-loop-o 0))

@@ -91,7 +91,7 @@
          (tuple (: #i0 Dyn) (: #i0 Dyn) (: #i0 Dyn)
                 (: #i0 Dyn) (: #i0 Dyn) (: #i0 Dyn)
                 (: #\P Dyn) (: #i0 Dyn) (: #i0 Dyn))])
-    (let ([data : Dyn (vector number-of-options fake-data)]
+    (let ([data : Dyn (vector number-of-options (: fake-data Dyn))]
           [spots : Dyn (vector number-of-options (: #i0 Dyn))]
           [strikes : Dyn (vector number-of-options (: #i0 Dyn))]
           [rates : Dyn (vector number-of-options (: #i0 Dyn))]

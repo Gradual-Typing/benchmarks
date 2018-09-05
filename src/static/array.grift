@@ -1,7 +1,7 @@
 ;;; ARRAY1 -- One of the Kernighan and Van Wyk benchmarks.
 
 (define (create-x [n : Int]) : (Vect Int)
-  (let ([result : (Vect Int) (vector n 0)])
+  (let ([result : (Vect Int) (vector n (: 0 Int))])
     (begin
       (repeat (i 0 n) (_ : Unit ())
 	      (vector-set! result i i))
@@ -9,7 +9,7 @@
 
 (define (create-y [x : (Vect Int)]) : (Vect Int)
   (let ([n : Int (vector-length x)])
-    (let ([result : (Vect Int) (vector n 0)])
+    (let ([result : (Vect Int) (vector n (: 0 Int))])
       (begin
 	(repeat (i 0 n) (_ : Unit ())
 		(vector-set! result (- (- n i) 1) (vector-ref x (- (- n i) 1))))

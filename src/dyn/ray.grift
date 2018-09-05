@@ -28,7 +28,7 @@
        (fl- (point-z p1) (point-z p2))))
 
 (define *world* : (Vect (Tuple Dyn Dyn (Tuple Dyn Dyn Dyn)))
-  (vector 33 (tuple #i0 #i0 (tuple #i0 #i0 #i0))))
+  (vector 33 (: (tuple (: #i0 Dyn) (: #i0 Dyn) (: (tuple (: #i0 Dyn) (: #i0 Dyn) (: #i0 Dyn)) Dyn)) Dyn)))
 
 (define eye : (Tuple Dyn Dyn Dyn) (make-point #i0.0 #i0.0 #i200.0))
 
@@ -68,10 +68,8 @@
                           (loop pt ray 0
                                 (vector-length *world*)
                                 *world*
-                                (: (tuple #i0 #i0 (tuple #i0 #i0 #i0))
-                                   (Tuple Dyn Dyn (Tuple Dyn Dyn Dyn)))
-                                (: (tuple #i0 #i0 #i0)
-                                   (Tuple Dyn Dyn Dyn))
+                                (tuple (: #i0 Dyn) (: #i0 Dyn) (: (tuple (: #i0 Dyn) (: #i0 Dyn) (: #i0 Dyn)) Dyn))
+                                (tuple (: #i0 Dyn) (: #i0 Dyn) (: #i0 Dyn))
                                 #i1e308)])
                    (let ([s : Dyn (tuple-proj x 0)])
                      (let ([int : Dyn (tuple-proj x 1)])

@@ -92,17 +92,19 @@
         [fake-data
          : (Tuple Float Float Float Float 
                   Float Float Char Float Float)
-         (tuple #i0 #i0 #i0 #i0 #i0 #i0 #\P #i0 #i0)])
+         (tuple (: #i0 Float) (: #i0 Float) (: #i0 Float)
+	 	(: #i0 Float) (: #i0 Float) (: #i0 Float)
+		(: #\P Char) (: #i0 Float) (: #i0 Float))])
     (let ([data
            : (Vect (Tuple Float Float Float Float Float Float Char Float Float))
-           (vector number-of-options fake-data)]
-          [spots : (Vect Float) (vector number-of-options #i0)]
-          [strikes : (Vect Float) (vector number-of-options #i0)]
-          [rates : (Vect Float) (vector number-of-options #i0)]
-          [volatilities : (Vect Float) (vector number-of-options #i0)]
-          [otypes : (Vect Int) (vector number-of-options 0)]
-          [otimes : (Vect Float) (vector number-of-options #i0)])
-      (begin 
+           (vector number-of-options (: fake-data (Tuple Float Float Float Float Float Float Char Float Float)))]
+          [spots : (Vect Float) (vector number-of-options (: #i0 Float))]
+          [strikes : (Vect Float) (vector number-of-options (: #i0 Float))]
+          [rates : (Vect Float) (vector number-of-options (: #i0 Float))]
+          [volatilities : (Vect Float) (vector number-of-options (: #i0 Float))]
+          [otypes : (Vect Int) (vector number-of-options (: 0 Int))]
+          [otimes : (Vect Float) (vector number-of-options (: #i0 Float))])
+      (begin
         (repeat (i 0 number-of-options) (_ : Unit ()) 
          (vector-set! data i (read-option)))
         (repeat (i 0 number-of-options) (_ : Unit ())
@@ -120,7 +122,7 @@
              (vector-set! rates i (tuple-proj od 2))
              (vector-set! volatilities i (tuple-proj od 4))
              (vector-set! otimes i (tuple-proj od 5)))))
-        (let ([prices : (Vect Float) (vector number-of-options #i0)])
+        (let ([prices : (Vect Float) (vector number-of-options (: #i0 Float))])
           (begin
             (repeat (j 0 number-of-runs) (_ : Unit ())
               (repeat (i 0 number-of-options) (_ : Unit ())

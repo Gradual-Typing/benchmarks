@@ -1,6 +1,6 @@
 (define (run-benchmark) : Unit
   (let ([n : Int (read-int)])
-    (let ([data : (Vect Float) (vector n #i0.0)]
+    (let ([data : (Vect Float) (vector n (: #i0.0 Float))]
           [pi*2 : Float #i6.28318530717959])
       (letrec ([loop1
                 : (Int Int -> Unit)
@@ -28,7 +28,7 @@
                   : Unit
                   (if (and (>= m 2) (>= j m))
                       (loop2 (quotient m 2) (- j m) i)
-                      (loop1 (+ i 2) (+ j m))))] 
+                      (loop1 (+ i 2) (+ j m))))]
                [loop3
                 : (Int -> Unit)
                 (lambda ([mmax : Int])
@@ -54,7 +54,7 @@
                   : Unit
                   (if (< m mmax)
                       (loop5 m mmax wr wi m wpr wpi)
-                      ()))] 
+                      ()))]
                [loop5
                 : (Int Int Float Float Int Float Float -> Unit)
                 (lambda ([i : Int]
@@ -97,9 +97,3 @@
           (display-char #\newline))))))
 
 (time (run-benchmark))
-
-
-
-
-
-

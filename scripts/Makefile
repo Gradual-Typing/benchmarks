@@ -10,16 +10,13 @@ BENCHMARK_DIR ?=fresh
 all: external fine
 
 external:
-	ulimit -s unlimited
 	./extremes.sh $(TIMING_SAMPLES) $(ROOT_DIR) $(BENCHMARK_DIR) 17 19
 
 fine:
-	ulimit -s unlimited
 	./lattice_bins.sh fine $(BIN_SAMPLES) $(NUM_BINS) $(TIMING_SAMPLES) \
 		true $(ROOT_DIR) $(BENCHMARK_DIR) 17 7 19 17 17 13 19 15 17 8 19 11
 
 coarse:
-	ulimit -s unlimited
 	./lattice_bins.sh coarse $(BIN_SAMPLES) $(NUM_BINS) $(TIMING_SAMPLES) \
 		true $(ROOT_DIR) $(BENCHMARK_DIR) 17 7 19 17 17 13 19 15 17 8 19 11
 

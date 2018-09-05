@@ -11,6 +11,9 @@ set -euo pipefail
 declare -r PRECISION=5
 TIMEFORMAT=%R
 
+# needed for the fft benchmarks
+ulimit -s unlimited
+
 # $1 - baseline system
 # $2 - logfile index
 # $3 - $path
@@ -494,7 +497,7 @@ run_benchmark()
         sed -i '1i;; 0.0%' "$benchmark_0_file"
         echo "0% created"
     fi
-    
+
     if [ "$CAST_PROFILER" = true ] ; then
         grift-bench --cast-profiler -j 4 -s "$c1 $c2" "${lattice_path}/"
     else

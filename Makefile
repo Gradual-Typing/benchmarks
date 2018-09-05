@@ -11,17 +11,21 @@ all: build run
 build:
 	time docker build $(DOCKER_BUILD_FLAGS) -t $(IMAGE_NAME) . 2>&1 | tee $<.log
 
+# --userns=host is needed because of https://docs.docker.com/engine/security/userns-remap/
+# beware that the files created on the host volume will be owned by root
 run:
 	cp -r ./* $(HOST_EXPERIMENT_DIR)
-	docker run -it -v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
+	docker run --userns=host \
+		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME)
 
 debug:
 	time docker build $(DOCKER_BUILD_FLAGS) -t $(IMAGE_NAME) . 2>&1 | tee $<.log
 	rm -rf $(HOST_EXPERIMENT_DIR)/*
 	cp -r ./* $(HOST_EXPERIMENT_DIR)
-	docker run -it -v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
-		--name=$(CONTAINER_NAME) $(IMAGE_NAME)
+	docker run --rm -it --userns=host \
+		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
+		--name=$(CONTAINER_NAME) $(IMAGE_NAME) /bin/bash
 
 docker-clean:
 	@echo "Remove all non running containers"

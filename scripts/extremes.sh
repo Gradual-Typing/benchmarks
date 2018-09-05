@@ -5,6 +5,9 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 declare -r PRECISION=5
 TIMEFORMAT=%R
 
+# needed for the fft benchmarks
+ulimit -s unlimited
+
 # $1 - baseline system
 # $2 - benchmark filename without extension
 # $3 - space-separated benchmark arguments

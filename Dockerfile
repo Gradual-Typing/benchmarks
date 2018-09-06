@@ -24,6 +24,16 @@ RUN mkdir ~/tmp && cd ~/tmp && git clone https://aur.archlinux.org/yay.git \
 RUN cd ~/tmp && yay --quiet --noconfirm -S chez-scheme-git
 USER root
 
+# installing utilities for the experiments
+# sice machines run kernel 3.10 which causes problems with Qt5
+# see https://bbs.archlinux.org/viewtopic.php?pid=1755257#p1755257
+RUN wget http://downloads.sourceforge.net/sourceforge/gnuplot/gnuplot-5.2.0.tar.gz \
+    && tar -zxvf gnuplot-5.2.0.tar.gz && cd gnuplot-5.2.0 \
+    && ./configure --disable-wxwidgets --with-qt=no --with-x --with-readline=gnu \
+    && make -j 8 && make install
+RUN pacman --quiet --noconfirm -S bc
+RUN raco pkg install --auto csv-reading
+
 # invalidate Docker cache to always pull the recent version of the dynamizer and grift
 ARG CACHE_DATE=not_a_date
 
@@ -36,24 +46,13 @@ RUN git clone https://github.com/Gradual-Typing/Dynamizer.git \
 
 # installing Grift
 RUN git clone https://github.com/Gradual-Typing/Grift.git \
-    && cd Grift && git checkout moving-benchmark \
-    && export PLTSTDERR="error debug@tr-timing" \
+    && cd Grift && export PLTSTDERR="error debug@tr-timing" \
     && raco pkg install
 RUN cd Grift && raco exe -o grift main.rkt \
     && raco exe -o grift-bench benchmark/bench.rkt \
     && raco exe -o grift-configs benchmark/configs.rkt \
     && cp grift grift-bench grift-configs /usr/local/bin
 RUN pacman --quiet --noconfirm -S clang
-
-# installing utilities for the experiments
-# sice machines run kernel 3.10 which causes problems with Qt5
-# see https://bbs.archlinux.org/viewtopic.php?pid=1755257#p1755257
-RUN wget http://downloads.sourceforge.net/sourceforge/gnuplot/gnuplot-5.2.0.tar.gz \
-    && tar -zxvf gnuplot-5.2.0.tar.gz && cd gnuplot-5.2.0 \
-    && ./configure --disable-wxwidgets --with-qt=no --with-x --with-readline=gnu \
-    && make -j 8 && make install
-RUN pacman --quiet --noconfirm -S bc
-RUN raco pkg install --auto csv-reading
 
 ARG EXPR_DIR=not_a_path
 

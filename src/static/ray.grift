@@ -33,7 +33,7 @@
   (vector 33 (: (tuple (: #i0 Float)
   	     	    (: #i0 Float)
   	     	    (: (tuple (: #i0 Float) (: #i0 Float) (: #i0 Float)) (Tuple Float Float Float)))
-		       (Vect (Tuple Float Float (Tuple Float Float Float))))))
+		       (Tuple Float Float (Tuple Float Float Float)))))
 
 (define eye : (Tuple Float Float Float) (make-point #i0.0 #i0.0 #i200.0))
 

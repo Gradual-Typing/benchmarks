@@ -30,10 +30,7 @@
                        (fl- (point-z p1) (point-z p2))))
 
 (define *world* : (Vect (Tuple Float Float (Tuple Float Float Float)))
-  (vector 33 (: (tuple (: #i0 Float)
-  	     	    (: #i0 Float)
-  	     	    (: (tuple (: #i0 Float) (: #i0 Float) (: #i0 Float)) (Tuple Float Float Float)))
-		       (Tuple Float Float (Tuple Float Float Float)))))
+  (vector 33 (tuple #i0 #i0 (tuple #i0 #i0 #i0))))
 
 (define eye : (Tuple Float Float Float) (make-point #i0.0 #i0.0 #i200.0))
 
@@ -73,11 +70,8 @@
                           (loop pt ray 0
                                 (vector-length *world*)
                                 *world*
-                                (tuple (: #i0 Float)
-				       (: #i0 Float)
-				       (: (tuple (: #i0 Float) (: #i0 Float) (: #i0 Float))
-				   	  (Tuple Float Float Float)))
-                                (tuple (: #i0 Float) (: #i0 Float) (: #i0 Float))
+                                (tuple #i0 #i0 (tuple #i0 #i0 #i0))
+                                (tuple #i0 #i0 #i0)
                                 #i1e308)])
                    (let ([s : (Tuple Float Float (Tuple Float Float Float))
                             (tuple-proj x 0)])
@@ -138,6 +132,7 @@
                                      (if (fl< d dist)
                                          (loop pt ray (+ index 1) lst-len lst s h d)
                                          (loop pt ray (+ index 1) lst-len lst surface hit dist))))))))))))))
+
 
 (define (lambert [s : (Tuple Float Float (Tuple Float Float Float))]
                  [int : (Tuple Float Float Float)]

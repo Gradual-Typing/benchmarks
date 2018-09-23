@@ -1,7 +1,7 @@
 (define (run-benchmark)
   : Unit
   (let ([size : Int (read-int)])
-    (let ([a : (Vect Int) (vector size (: 1 Int))])
+    (let ([a : (Vect Int) (vector size 1)])
       (letrec ([sort
                 : ((Vect Int) Int Int -> ())
                 (lambda ([a : (Vect Int)] [p : Int] [r : Int])
@@ -16,7 +16,7 @@
                 : ((Vect Int) Int Int -> Int)
                 (lambda ([a : (Vect Int)] [p : Int] [r : Int])
                   : Int
-                  (let ([i : (Ref Int) (box (: (- p 1) Int))]
+                  (let ([i : (Ref Int) (box (- p 1))]
                         [x : Int (vector-ref a r)])
                     (begin
                       (repeat (j p r) (_ : Unit ())

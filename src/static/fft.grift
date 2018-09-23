@@ -1,6 +1,6 @@
 (define (run-benchmark) : Unit
   (let ([n : Int (read-int)])
-    (let ([data : (Vect Float) (vector n (: #i0.0 Float))]
+    (let ([data : (Vect Float) (vector n #i0.0)]
           [pi*2 : Float #i6.28318530717959])
       (letrec ([loop1
                 : (Int Int -> Unit)

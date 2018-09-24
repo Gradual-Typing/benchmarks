@@ -34,11 +34,17 @@ RUN wget http://downloads.sourceforge.net/sourceforge/gnuplot/gnuplot-5.2.0.tar.
 RUN pacman --quiet --noconfirm -S bc
 RUN raco pkg install --auto csv-reading
 
+# These are needed for building the dynamizer and grift programs, they should
+# not be installed after invalidating the cache because arch linux could have
+# moved on by then and some of the dependencies will not be in the correct
+# state.
+RUN pacman --quiet --noconfirm -S stack
+RUN pacman --quiet --noconfirm -S clang
+
 # invalidate Docker cache to always pull the recent version of the dynamizer and grift
 ARG CACHE_DATE=not_a_date
 
 # installing the Dynamizer
-RUN pacman --quiet --noconfirm -S stack
 RUN git clone https://github.com/Gradual-Typing/Dynamizer.git \
     && mkdir -p /home/root && cd Dynamizer && stack setup \
     && stack build && stack install \
@@ -52,7 +58,6 @@ RUN cd Grift && raco exe -o grift main.rkt \
     && raco exe -o grift-bench benchmark/bench.rkt \
     && raco exe -o grift-configs benchmark/configs.rkt \
     && cp grift grift-bench grift-configs /usr/local/bin
-RUN pacman --quiet --noconfirm -S clang
 
 ARG EXPR_DIR=not_a_path
 

@@ -2,7 +2,8 @@ IMAGE_NAME=benchmarks
 CONTAINER_NAME=benchmarks_container
 HOST_EXPERIMENT_DIR=/home/$(USER)/experiments
 CONTAINER_EXPERIMENT_DIR=/app/experiments
-DOCKER_BUILD_FLAGS=--build-arg CACHE_DATE=$(date +%Y-%m-%d:%H:%M:%S) --build-arg EXPR_DIR=$(CONTAINER_EXPERIMENT_DIR)
+DATE=$(shell date +%Y-%m-%d:%H:%M:%S)
+DOCKER_BUILD_FLAGS=--build-arg CACHE_DATE=$(DATE) --build-arg EXPR_DIR=$(CONTAINER_EXPERIMENT_DIR)
 
 all: build run
 

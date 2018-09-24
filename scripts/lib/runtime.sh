@@ -463,7 +463,7 @@ mean()
 {
     local logfile="$1"; shift
     local indx="$1";    shift
-    RETURN=$(cat "$logfile1" | sed 1d | awk -F',' -v indx=$indx '{sum+=$indx; ++n} END { print sum/n }')
+    RETURN=$(cat "$logfile" | sed 1d | awk -F',' -v indx=$indx '{sum+=$indx; ++n} END { print sum/n }')
 }
 
 runtime_mean()

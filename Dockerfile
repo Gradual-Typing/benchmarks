@@ -51,13 +51,8 @@ RUN git clone https://github.com/Gradual-Typing/Dynamizer.git \
     && cp /root/.local/bin/dynamizer /usr/local/bin
 
 # installing Grift
-RUN git clone https://github.com/Gradual-Typing/Grift.git \
-    && cd Grift && export PLTSTDERR="error debug@tr-timing" \
-    && raco pkg install
-RUN cd Grift && raco exe -o grift main.rkt \
-    && raco exe -o grift-bench benchmark/bench.rkt \
-    && raco exe -o grift-configs benchmark/configs.rkt \
-    && cp grift grift-bench grift-configs /usr/local/bin
+RUN raco pkg install grift
+RUN cp /root/.racket/7.0/bin/* /usr/local/bin
 
 ARG EXPR_DIR=not_a_path
 

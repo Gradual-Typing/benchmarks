@@ -35,8 +35,8 @@ eof
   (pregexp
    #<<eos
 \(time .+\)
-\s+(\d+) ms real time
-\s+\d+ ms cpu time
+\s+(\d+\.\d+) secs real time
+\s+\d+\.\d+ secs cpu time
 eos
    ))
 
@@ -69,8 +69,7 @@ eos
   (parse-time racket-time-rx exact-millisecond-str-time->seconds))
 (define strip-racket-time (strip-time racket-time-rx))
 
-(define parse-gambit-time
-  (parse-time gambit-time-rx exact-millisecond-str-time->seconds))
+(define parse-gambit-time (parse-time gambit-time-rx string->number))
 (define strip-gambit-time (strip-time gambit-time-rx))
 
 (define parse-chez-time (parse-time chez-time-rx string->number))

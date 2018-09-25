@@ -12,14 +12,17 @@ function main()
     declare -r TMP_DIR="${EXP_DIR}/tmp"
 
     . ${LIB_DIR}/runtime.sh
+    . ${LIB_DIR}/benchmarks.sh
     . ${LIB_DIR}/plotting.sh
 
     dyn_config=17
 
-    plot 19 17 $dyn_config
-    plot 17 7 $dyn_config
-    plot 17 13 $dyn_config
-    plot 17 8 $dyn_config
+    plot_one_config 19 $dyn_config
+
+    plot_two_configs 19 17 $dyn_config
+    plot_two_configs 17 7 $dyn_config
+    plot_two_configs 17 13 $dyn_config
+    plot_two_configs 17 8 $dyn_config
 }
 
 main "$@"

@@ -23,7 +23,7 @@ write_grift_speedups()
     local dir="$1";             shift
     local logfile="$1";         shift
     
-    for config_index in ${configs[@]}; do
+    for config_index in ${CONFIGS[@]}; do
         get_grift_speedup $baseline_system "${TMP_DIR}/${dir}/${name}"\
                           "$benchmark_args" "$disk_aux_name" $config_index
         printf ",$RETURN" >> $logfile
@@ -159,36 +159,17 @@ run_experiment()
     local logfile2="${DATA_DIR}/dyn.log"
     local logfile3="${DATA_DIR}/partial.log"
 
-    local config_str=$(grift-configs --name-end " Grift" --names $configs)
-    local shared_str=$(grift-configs --name-sep "_" --common $configs)
+    local config_str=$(grift-configs --name-end " Grift" --names $CONFIGS)
+    local shared_str=$(grift-configs --name-sep "_" --common $CONFIGS)
     
     echo "name,${config_str},Typed-Racket,OCaml" > "$logfile1"
     echo "name,${config_str},Gambit,Chez Scheme" > "$logfile2"
     echo "name,${config_str}" > "$logfile3"
 
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "blackscholes" "in_64K.txt" ""
-
-    # run_benchmark $baseline_system_static $baseline_system_dynamic\
-        #               "array" "slow.txt" ""
-    
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "tak" "slow.txt" ""
-
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "ray" "empty.txt" ""
-    
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "matmult" "400.txt" ""
-    
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "quicksort" "in_descend10000.txt" ""
-
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "fft" "slow.txt" ""
-
-    run_benchmark $baseline_system_static $baseline_system_dynamic\
-                  "n_body" "slow.txt" ""
+    for ((i=0;i<${#BENCHMARKS_ARGS_EXTREMES[@]};++i)); do
+	run_benchmark $baseline_system_static $baseline_system_dynamic\
+                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_EXTREMES[i]}" ""
+    done
 
     local gmlog1=$(racket "${LIB_DIR}/geometric-mean.rkt" $logfile1)
     local gmlog2=$(racket "${LIB_DIR}/geometric-mean.rkt" $logfile2)
@@ -209,7 +190,7 @@ main()
     LOOPS="$1";      shift
     ROOT_DIR="$1";   shift
     local date="$1"; shift
-    configs="$@"
+    CONFIGS="$@"
 
     declare -r EXTREMES_DIR="${ROOT_DIR}/extremes"
     
@@ -258,6 +239,7 @@ main()
     mkdir -p "$OUT_DIR"
 
     . "${LIB_DIR}/runtime.sh"
+    . "${LIB_DIR}/benchmarks.sh"
 
     if [ ! -d $TMP_DIR ]; then
         # copying the benchmarks to a temporary directory

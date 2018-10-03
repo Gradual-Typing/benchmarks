@@ -195,7 +195,7 @@ run_benchmark()
 				sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
 	else
 	    dynamizer_out=$(dynamizer "${lattice_path}.grift"\
-                                      --coarse | \
+                                      --coarse 10 | \
 				sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
 	fi
         echo "$dynamizer_out" > "$lattice_file"

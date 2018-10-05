@@ -23,7 +23,7 @@ run_config()
     local path="$1";            shift
     local input_file="$1";      shift
     local disk_aux_name="$1";   shift
-    
+
     local name=$(basename "$path")
     local logfile="${DATA_DIR}/${name}${disk_aux_name}${i}.log"
     local cache_file="${TMP_DIR}/static/${name}${disk_aux_name}${i}.cache"
@@ -48,7 +48,7 @@ run_config()
             local sample_index="$(basename $binpath)"
             local bname="$(basename $b)"
             local input="${INPUT_DIR}/${name}/${input_file}"
-            
+
             avg "$b" "$input"\
                 "static" "${OUTPUT_DIR}/static/${name}/${input_file}"\
                 "${b}.runtimes"
@@ -96,17 +96,21 @@ run_config()
     fi
 }
 
-# $1 - baseline system
-# $2 - first config index
-# $3 - second config index
-# $4 - $path
-# $5 - space-separated benchmark arguments
-# $6 - output of dynamizer
-# $7 - printed name of the benchmark
-# $8 - disk aux name
+# $1  - baseline system
+# $2  - statically typed system
+# $3  - dynamically typed system
+# $4  - first config index
+# $5  - second config index
+# $6  - $path
+# $7  - space-separated benchmark arguments
+# $8  - output of dynamizer
+# $9  - printed name of the benchmark
+# $10 - disk aux name
 gen_output()
 {
     local baseline_system="$1"; shift
+    local static_system="$1";   shift
+    local dynamic_system="$1";  shift
     local c1="$1";              shift
     local c2="$1";              shift
     local path="$1";            shift
@@ -121,6 +125,9 @@ gen_output()
     run_config $baseline_system "$c2" "$path" "$input_file" "$disk_aux_name"
     local n="$RETURN"
 
+    $static_system "$name" "$input_file" "$disk_aux_name"
+    $dynamic_system "$name" "$input_file" "$disk_aux_name"
+
     speedup_geometric_mean "$logfile1"
     g1="$RETURN"
 
@@ -128,23 +135,27 @@ gen_output()
     g2="$RETURN"
 
     printf "geometric means %s:\t\t%d=%.4f\t%d=%.4f\n" $name $c1 $g1 $c2 $g2
-    
+
     racket ${LIB_DIR}/csv-set.rkt --add "$name , $c1 , $g1"\
            --add "$name , $c2 , $g2"\
            --in "$GMEANS" --out "$GMEANS"
 }
 
-# $1 - baseline system
-# $2 - first config index
-# $3 - second config index
-# $4 - benchmark filename without extension
-# $5 - space-separated benchmark arguments
-# $6 - nsamples
-# $7 - nbins
-# $8 - aux name
+# $1  - baseline system
+# $2  - statically typed system
+# $3  - dynamically typed system
+# $4  - first config index
+# $5  - second config index
+# $6  - benchmark filename without extension
+# $7  - space-separated benchmark arguments
+# $8  - nsamples
+# $9  - nbins
+# $10 - aux name
 run_benchmark()
 {
     local baseline_system="$1"; shift
+    local static_system="$1";   shift
+    local dynamic_system="$1";  shift
     local c1="$1";              shift
     local c2="$1";              shift
     local name="$1";            shift
@@ -188,16 +199,16 @@ run_benchmark()
         rm -f "${lattice_path}.grift"
         cp "$static_source_file" "${lattice_path}.grift"
 
-	dynamizer_out=""
-	if [ "$LEVEL" = "fine" ]; then
+        dynamizer_out=""
+        if [ "$LEVEL" = "fine" ]; then
             dynamizer_out=$(dynamizer "${lattice_path}.grift"\
                                       --samples "$nsamples" --bins "$nbins" | \
-				sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
-	else
-	    dynamizer_out=$(dynamizer "${lattice_path}.grift"\
+                                sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
+        else
+            dynamizer_out=$(dynamizer "${lattice_path}.grift"\
                                       --coarse 10 | \
-				sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
-	fi
+                                sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
+        fi
         echo "$dynamizer_out" > "$lattice_file"
     fi
 
@@ -219,17 +230,22 @@ run_benchmark()
         grift-bench -s "$c1 $c2" "${lattice_path}/"
     fi
 
-    gen_output $baseline_system $c1 $c2 "$lattice_path" "$input_file" "$disk_aux_name"
+    gen_output $baseline_system $static_system $dynamic_system $c1 $c2\
+               "$lattice_path" "$input_file" "$disk_aux_name"
 }
 
 # $1 - baseline system
-# $2 - first config index
-# $3 - second config index
-# $4 - nsamples
-# $5 - nbins
+# $2 - statically typed system
+# $3 - dynamically typed system
+# $4 - first config index
+# $5 - second config index
+# $6 - nsamples
+# $7 - nbins
 run_experiment()
 {
     local baseline_system="$1"; shift
+    local static_system="$1";   shift
+    local dynamic_system="$1";  shift
     local c1="$1";              shift
     local c2="$1";              shift
     local nsamples="$1";        shift
@@ -238,15 +254,16 @@ run_experiment()
     local g=()
 
     for ((i=0;i<${#BENCHMARKS[@]};++i)); do
-	run_benchmark $baseline_system $c1 $c2 "${BENCHMARKS[i]}" \
-                      "${BENCHMARKS_ARGS_LATTICE[i]}" "$nsamples" "$nbins" ""
-	g+=($RETURN)
+        run_benchmark $baseline_system $static_system $dynamic_system $c1 $c2\
+                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_LATTICE[i]}"\
+                      "$nsamples" "$nbins" ""
+        g+=($RETURN)
     done
 
     IFS=$'\n'
     max=$(echo "${g[*]}" | sort -nr | head -n1)
     min=$(echo "${g[*]}" | sort -n | head -n1)
-    
+
     echo "finished experiment comparing" $c1 "vs" $c2 \
          ", where speedups range from " $min " to " $max
 }
@@ -266,7 +283,6 @@ main()
     ROOT_DIR="$1";       shift
     local date="$1";     shift
 
-
     declare -r LB_DIR="${ROOT_DIR}/lattice_bins"
     if [ "$date" == "fresh" ]; then
         declare -r DATE=`date +%Y_%m_%d_%H_%M_%S`
@@ -283,7 +299,7 @@ main()
             exit 1
         fi
     fi
-    
+
     declare -r EXP_DIR="$LB_DIR/$DATE"
     declare -r DATA_DIR="$EXP_DIR/data"
     declare -r OUT_DIR="$EXP_DIR/output"
@@ -294,7 +310,7 @@ main()
     declare -r OUTPUT_DIR="${ROOT_DIR}/outputs"
     declare -r LIB_DIR="${ROOT_DIR}/scripts/lib"
     declare -r PARAMS_LOG="$EXP_DIR/params.txt"
-    
+
     # Check to see if all is right in the world
     if [ ! -d $ROOT_DIR ]; then
         echo "directory not found: ${ROOT_DIR}" 1>&2
@@ -315,11 +331,11 @@ main()
         echo "directory not found: ${LIB_DIR}" 1>&2
         exit 1
     fi
-    
+
     # create the result directory if it does not exist
     mkdir -p "$DATA_DIR"
     mkdir -p "$OUT_DIR"
-    rm -f $GMEANS 
+    rm -f $GMEANS
     touch $GMEANS
 
     . "${LIB_DIR}/runtime.sh"
@@ -327,13 +343,13 @@ main()
 
     local baseline_system=get_racket_runtime
     local static_system=get_static_grift_runtime
-    
-    
+    local dynamic_system=get_dyn_grift_17_runtime
+
     if [ ! -d $TMP_DIR ]; then
         # copying the benchmarks to a temporary directory
         cp -r ${SRC_DIR} $TMP_DIR
         mkdir -p "$TMP_DIR/partial"
-        
+
         # logging
         printf "Date\t\t:%s\n" "$DATE" >> "$PARAMS_LOG"
         MYEMAIL="`id -un`@`hostname -f`"
@@ -359,7 +375,8 @@ main()
         for i in `seq ${config}`; do
             for j in `seq ${i} ${config}`; do
                 if [ ! $i -eq $j ]; then
-                    run_experiment $baseline_system $i $j $nsamples $nbins
+                    run_experiment $baseline_system $static_system \
+                                   $dynamic_system $i $j $nsamples $nbins
                 fi
             done
         done
@@ -367,13 +384,14 @@ main()
         while (( "$#" )); do
             i=$1; shift
             j=$1; shift
-            run_experiment $baseline_system $i $j $nsamples $nbins
+            run_experiment $baseline_system $static_system $dynamic_system $i\
+                           $j $nsamples $nbins
         done
     fi
 
     racket ${LIB_DIR}/csv-set.rkt -i $GMEANS --config-names 1 \
            --si 2 \
-           -o ${OUT_DIR}/gm-total.csv 
+           -o ${OUT_DIR}/gm-total.csv
     racket ${LIB_DIR}/csv-set.rkt -i $GMEANS --config-names 1 \
            --si 2 --su 0 \
            -o ${OUT_DIR}/gm-benchmart.csv

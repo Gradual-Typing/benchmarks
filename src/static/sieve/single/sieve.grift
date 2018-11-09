@@ -31,7 +31,7 @@
   ;; because we are not performing tail call optimization.
   ;; 5x performance increase.
   (stream-first
-   (repeat (i 0 i) (st : Dyn st) (stream-rest st))))
+   (repeat (i 0 i) (st : (Rec s (Tuple Int (-> s))) st) (stream-rest st))))
 
 ;; Use the partner file "streams.rkt" to implement the Sieve of
 ;; Eratosthenes.  Then compute and print the 10,000th prime number.

@@ -37,4 +37,4 @@
     ;; because we are not performing tail call optimization.
     ;; 5x performance increase.
     (stream-first
-     (repeat (i 0 i) (st : Dyn st) (stream-rest st)))))
+     (repeat (i 0 i) (st : (Rec s (Tuple Int (-> s))) st) (stream-rest st)))))

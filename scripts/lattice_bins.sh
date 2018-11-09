@@ -11,28 +11,29 @@ ulimit -s unlimited
 umask 000
 
 # $1 - baseline system
-# $2 - logfile index
-# $3 - $path
+# $2 - configuration index
+# $3 - directory path of the samples, it should have the binaries. Also, the
+#      directory name is the same as the benchmark name
 # $4 - space-separated benchmark arguments
 # $5 - disk aux name
 # $RETURN - number of configurations
 run_config()
 {
-    local baseline_system="$1"; shift
-    local i="$1";               shift
-    local path="$1";            shift
-    local input_file="$1";      shift
-    local disk_aux_name="$1";   shift
+    local baseline_system="$1";        shift
+    local config_index="$1";           shift
+    local samples_directory_path="$1"; shift
+    local input_filename="$1";         shift
+    local disk_aux_name="$1";          shift
 
-    local name=$(basename "$path")
-    local logfile="${DATA_DIR}/${name}${disk_aux_name}${i}.log"
-    local cache_file="${TMP_DIR}/static/${name}${disk_aux_name}${i}.cache"
-    local bs=$(find "$path" -name "*.o$i")
+    local name=$(basename "$samples_directory_path")
+    local logfile="${DATA_DIR}/${name}${disk_aux_name}${config_index}.log"
+    local cache_file="${TMP_DIR}/static/${name}${disk_aux_name}${config_index}.cache"
+
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
         local n=0 b
-        $baseline_system "$name" "$input_file" "$disk_aux_name"
+        $baseline_system "$name" "$input_filename" "$disk_aux_name"
         local baseline="$RETURN"
         if [ "$CAST_PROFILER" = true ]; then
             echo "name,precision,time,slowdown,speedup,total values allocated,total casts,longest proxy chain,total proxies accessed,total uses,function total values allocated,vector total values allocated,ref total values allocated,tuple total values allocated,function total casts,vector total casts, ref total casts,tuple total casts,function longest proxy chain,vector longest proxy chain,ref longest proxy chain,tuple longest proxy chain,function total proxies accessed,vector total proxies accessed,ref total proxies accessed,tuple total proxies accessed,function total uses,vector total uses,ref total uses,tuple total uses,injects casts,projects casts"\
@@ -40,18 +41,18 @@ run_config()
         else
             echo "name,precision,time,slowdown,speedup" > "$logfile"
         fi
-        for b in $(find "$path" -name "*.o$i"); do
+        for sample_path in $(find "$samples_directory_path" -name "*.o${config_index}"); do
             let n=n+1
-            local binpath="${b%.*}"
+            local sample_path_without_extension="${sample_path%.*}"
             local p=$(sed -n 's/;; \([0-9]*.[0-9]*\)%/\1/p;q' \
-                          < "${binpath}.grift")
-            local sample_index="$(basename $binpath)"
-            local bname="$(basename $b)"
-            local input="${INPUT_DIR}/${name}/${input_file}"
+                          < "${sample_path_without_extension}.grift")
+            local sample_number="$(basename $sample_path_without_extension)"
+            local sample_bin_filename="$(basename $sample_path)"
+            local input_filepath="${INPUT_DIR}/${name}/${input_filename}"
 
-            avg "$b" "$input"\
-                "static" "${OUTPUT_DIR}/static/${name}/${input_file}"\
-                "${b}.runtimes"
+            avg "$sample_path" "$input_filepath"\
+                "static" "${OUTPUT_DIR}/static/${name}/${input_filename}"\
+                "${sample_path}.runtimes"
             local t="$RETURN"
             local speedup=$(echo "${baseline}/${t}" | \
                                 bc -l | \
@@ -59,33 +60,33 @@ run_config()
             local slowdown=$(echo "${t}/${baseline}" | \
                                  bc -l | \
                                  awk -v p="$PRECISION" '{printf "%.*f\n", p,$0}')
-            echo $n $b $speedup
+            echo $n $sample_path $speedup
             printf "%s,%.2f,%.${PRECISION}f,%.${PRECISION}f,%.${PRECISION}f" \
-                   $sample_index $p $t $slowdown $speedup >> "$logfile"
+                   $sample_number $p $t $slowdown $speedup >> "$logfile"
 
             if [ "$CAST_PROFILER" = true ] ; then
                 # run the cast profiler
-                eval "cat ${input} | ${b}.prof.o" > /dev/null 2>&1
-                mv "$bname.prof.o.prof" "${b}.prof"
+                eval "cat ${input_filepath} | ${sample_path}.prof.o" > /dev/null 2>&1
+                mv "$sample_bin_filename.prof.o.prof" "${sample_path}.prof"
                 printf "," >> "$logfile"
                 # ignore first and last rows and sum the values across all
                 # columns in the profile into one column and transpose it into
                 # a row
-                sed '1d;$d' "${b}.prof" | awk -F, '{print $2+$3+$4+$5+$6+$7}'\
+                sed '1d;$d' "${sample_path}.prof" | awk -F, '{print $2+$3+$4+$5+$6+$7}'\
                     | paste -sd "," - | xargs echo -n >> "$logfile"
                 echo -n "," >> "$logfile"
                 # ignore the first row and the first column and stitsh together
                 # all rows into one row
-                sed '1d;$d' "${b}.prof" | cut -f1 -d"," --complement\
+                sed '1d;$d' "${sample_path}.prof" | cut -f1 -d"," --complement\
                     | awk -F, '{print $1","$2","$3","$4}' | paste -sd "," -\
                     | xargs echo -n >> "$logfile"
                 echo -n "," >> "$logfile"
                 # writing injections
-                sed '1d;$d' "${b}.prof" | cut -f1 -d"," --complement\
+                sed '1d;$d' "${sample_path}.prof" | cut -f1 -d"," --complement\
                     | awk -F, 'FNR == 2 {print $5}' | xargs echo -n >> "$logfile"
                 echo -n "," >> "$logfile"
                 # writing projections
-                sed '1d;$d' "${b}.prof" | cut -f1 -d"," --complement\
+                sed '1d;$d' "${sample_path}.prof" | cut -f1 -d"," --complement\
                     | awk -F, 'FNR == 2 {print $6}' >> "$logfile"
             else
                 printf "\n" >> "$logfile"
@@ -101,32 +102,31 @@ run_config()
 # $3  - dynamically typed system
 # $4  - first config index
 # $5  - second config index
-# $6  - $path
+# $6  - $samples_directory_path
 # $7  - space-separated benchmark arguments
 # $8  - output of dynamizer
 # $9  - printed name of the benchmark
 # $10 - disk aux name
 gen_output()
 {
-    local baseline_system="$1"; shift
-    local static_system="$1";   shift
-    local dynamic_system="$1";  shift
-    local c1="$1";              shift
-    local c2="$1";              shift
-    local path="$1";            shift
-    local input_file="$1";      shift
-    local disk_aux_name="$1";   shift
+    local baseline_system="$1";        shift
+    local static_system="$1";          shift
+    local dynamic_system="$1";         shift
+    local config1_index="$1";          shift
+    local config2_index="$1";          shift
+    local samples_directory_path="$1"; shift
+    local input_filename="$1";         shift
+    local disk_aux_name="$1";          shift
 
-    local name=$(basename "$path")
-    local logfile1="${DATA_DIR}/${name}${disk_aux_name}${c1}.log"
-    local logfile2="${DATA_DIR}/${name}${disk_aux_name}${c2}.log"
+    local name=$(basename "$samples_directory_path")
+    local logfile1="${DATA_DIR}/${name}${disk_aux_name}${config1_index}.log"
+    local logfile2="${DATA_DIR}/${name}${disk_aux_name}${config2_index}.log"
 
-    run_config $baseline_system "$c1" "$path" "$input_file" "$disk_aux_name"
-    run_config $baseline_system "$c2" "$path" "$input_file" "$disk_aux_name"
-    local n="$RETURN"
+    run_config $baseline_system "$config1_index" "$samples_directory_path" "$input_filename" "$disk_aux_name"
+    run_config $baseline_system "$config2_index" "$samples_directory_path" "$input_filename" "$disk_aux_name"
 
-    $static_system "$name" "$input_file" "$disk_aux_name"
-    $dynamic_system "$name" "$input_file" "$disk_aux_name"
+    $static_system "$name" "$input_filename" "$disk_aux_name"
+    $dynamic_system "$name" "$input_filename" "$disk_aux_name"
 
     speedup_geometric_mean "$logfile1"
     g1="$RETURN"
@@ -134,10 +134,10 @@ gen_output()
     speedup_geometric_mean "$logfile2"
     g2="$RETURN"
 
-    printf "geometric means %s:\t\t%d=%.4f\t%d=%.4f\n" $name $c1 $g1 $c2 $g2
+    printf "geometric means %s:\t\t%d=%.4f\t%d=%.4f\n" $name $config1_index $g1 $config2_index $g2
 
-    racket ${LIB_DIR}/csv-set.rkt --add "$name , $c1 , $g1"\
-           --add "$name , $c2 , $g2"\
+    racket ${LIB_DIR}/csv-set.rkt --add "$name , $config1_index , $g1"\
+           --add "$name , $config2_index , $g2"\
            --in "$GMEANS" --out "$GMEANS"
 }
 
@@ -156,18 +156,22 @@ run_benchmark()
     local baseline_system="$1"; shift
     local static_system="$1";   shift
     local dynamic_system="$1";  shift
-    local c1="$1";              shift
-    local c2="$1";              shift
-    local name="$1";            shift
-    local input_file="$1";  shift
+    local config1_index="$1";   shift
+    local config2_index="$1";   shift
+    local benchmark_name="$1";  shift
+    local input_filename="$1";  shift
     local nsamples="$1";        shift
     local nbins="$1";           shift
     local aux_name="$1";        shift
 
-    local lattice_path="${TMP_DIR}/partial/${name}"
-    local benchmarks_path="${TMP_DIR}/static"
-    local static_source_file="${benchmarks_path}/${name}.grift"
-    local dyn_source_file="${TMP_DIR}/dyn/${name}.grift"
+    local samples_directory_path="${TMP_DIR}/partial/${benchmark_name}"
+    local static_source_path="${TMP_DIR}/static/${benchmark_name}.grift"
+    if [ "$LEVEL" = "fine" ]; then
+	static_source_path="${TMP_DIR}/static/${benchmark_name}/single/${benchmark_name}.grift"
+    else
+	static_source_path="${TMP_DIR}/static/${benchmark_name}/modules"
+    fi
+    local dyn_source_file="${TMP_DIR}/dyn/${benchmark_name}.grift"
 
     local disk_aux_name="" print_aux_name=""
     if [[ ! -z "${aux_name}" ]]; then
@@ -175,8 +179,8 @@ run_benchmark()
         print_aux_name=" (${aux_name})"
     fi
 
-    local benchmark_args_file="${TMP_DIR}/${name}${disk_aux_name}.args"
-    local input="$(cat ${INPUT_DIR}/${name}/${input_file})"
+    local benchmark_args_file="${TMP_DIR}/${benchmark_name}${disk_aux_name}.args"
+    local input="$(cat ${INPUT_DIR}/${benchmark_name}/${input_filename})"
     if [ -f benchmark_args_file ]; then
         local old_input=$(cat "$benchmark_args_file")
         if [ ! $old_input == $input ]; then
@@ -184,54 +188,61 @@ run_benchmark()
             exit 1
         fi
     else
-        printf "Benchmark\t:%s\n" "$name" >> "$PARAMS_LOG"
+        printf "Benchmark\t:%s\n" "$benchmark_name" >> "$PARAMS_LOG"
         printf "Args\t\t:%s\n" "$input" >> "$PARAMS_LOG"
         echo "$input" > "$benchmark_args_file"
     fi
 
-    local lattice_file="${lattice_path}/out"
+    local lattice_file="${samples_directory_path}/out"
     local dynamizer_out=""
 
     if [ -f "$lattice_file" ]; then
         dynamizer_out=$(cat "$lattice_file")
     else
-        rm -rf "$lattice_path"
-        rm -f "${lattice_path}.grift"
-        cp "$static_source_file" "${lattice_path}.grift"
+        rm -rf "$samples_directory_path"
 
         dynamizer_out=""
         if [ "$LEVEL" = "fine" ]; then
-            dynamizer_out=$(dynamizer "${lattice_path}.grift"\
+	    rm -f "${samples_directory_path}.grift"
+            cp "$static_source_path" "${samples_directory_path}.grift"
+            dynamizer_out=$(dynamizer "${samples_directory_path}.grift" --fine\
                                       --samples "$nsamples" --bins "$nbins" | \
                                 sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
+
+	    # check for/create/annotate 100% and 0%
+	    local benchmark_100_file="${samples_directory_path}/static.grift"
+	    if [ ! -f benchmark_100_file ]; then
+		cp "$static_source_path" "$benchmark_100_file"
+		sed -i '1i;; 100.00%' "$benchmark_100_file"
+	    fi
+	    local benchmark_0_file="${samples_directory_path}/dyn.grift"
+	    if [ ! -f benchmark_0_file ]; then
+		cp "$dyn_source_file" "$benchmark_0_file"
+		sed -i '1i;; 0.0%' "$benchmark_0_file"
+	    fi
         else
-            dynamizer_out=$(dynamizer "${lattice_path}.grift"\
-                                      --coarse 10 | \
+            cp -a "$static_source_path/." "${TMP_DIR}/partial/"
+            dynamizer_out=$(dynamizer "${TMP_DIR}/partial/main.grift"\
+                                      --coarse | \
                                 sed -n 's/.* \([0-9]\+\) .* \([0-9]\+\) .*/\1 \2/p')
+	    # the source is created by the dynamizer
+	    mv "${TMP_DIR}/partial/main" "${samples_directory_path}"
+	    # deleting the source files so it does not mingle with sources of
+	    # other benchmarks where modules might happen to share the same name
+	    rm "${TMP_DIR}/partial/"*.grift
         fi
         echo "$dynamizer_out" > "$lattice_file"
     fi
 
-    # check for/create/annotate 100% and 0%
-    local benchmark_100_file="${lattice_path}/static.grift"
-    if [ ! -f benchmark_100_file ]; then
-        cp "$static_source_file" "$benchmark_100_file"
-        sed -i '1i;; 100.00%' "$benchmark_100_file"
-    fi
-    local benchmark_0_file="${lattice_path}/dyn.grift"
-    if [ ! -f benchmark_0_file ]; then
-        cp "$dyn_source_file" "$benchmark_0_file"
-        sed -i '1i;; 0.0%' "$benchmark_0_file"
-    fi
-
+    # Compile the samples
     if [ "$CAST_PROFILER" = true ] ; then
-        grift-bench --cast-profiler -j 4 -s "$c1 $c2" "${lattice_path}/"
+        grift-bench --cast-profiler -j 4 -s "$config1_index $config2_index" "${samples_directory_path}/"
     else
-        grift-bench -s "$c1 $c2" "${lattice_path}/"
+        grift-bench -s "$config1_index $config2_index" "${samples_directory_path}/"
     fi
 
-    gen_output $baseline_system $static_system $dynamic_system $c1 $c2\
-               "$lattice_path" "$input_file" "$disk_aux_name"
+    gen_output $baseline_system $static_system $dynamic_system $config1_index $config2_index\
+               "$samples_directory_path" "$input_filename" "$disk_aux_name"
 }
 
 # $1 - baseline system
@@ -246,15 +257,15 @@ run_experiment()
     local baseline_system="$1"; shift
     local static_system="$1";   shift
     local dynamic_system="$1";  shift
-    local c1="$1";              shift
-    local c2="$1";              shift
+    local config1_index="$1";              shift
+    local config2_index="$1";              shift
     local nsamples="$1";        shift
     local nbins="$1";           shift
 
     local g=()
 
     for ((i=0;i<${#BENCHMARKS[@]};++i)); do
-        run_benchmark $baseline_system $static_system $dynamic_system $c1 $c2\
+        run_benchmark $baseline_system $static_system $dynamic_system $config1_index $config2_index\
                       "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_LATTICE[i]}"\
                       "$nsamples" "$nbins" ""
         g+=($RETURN)
@@ -264,24 +275,24 @@ run_experiment()
     max=$(echo "${g[*]}" | sort -nr | head -n1)
     min=$(echo "${g[*]}" | sort -n | head -n1)
 
-    echo "finished experiment comparing" $c1 "vs" $c2 \
+    echo "finished experiment comparing" $config1_index "vs" $config2_index \
          ", where speedups range from " $min " to " $max
 }
 
 main()
 {
-    USAGE="Usage: $0 [fine|coarse] nsamples nbins loops cast_profiler? root [fresh|date] n_1,n_2 ... n_n"
+    USAGE="Usage: $0 root loops [fresh|date] cast_profiler? [fine|coarse] nsamples nbins n_1,n_2 ... n_n"
     if [ "$#" == "0" ]; then
         echo "$USAGE"
         exit 1
     fi
+    ROOT_DIR="$1";       shift
+    LOOPS="$1";          shift
+    local date="$1";     shift
+    CAST_PROFILER="$1";  shift
     local LEVEL="$1";    shift
     local nsamples="$1"; shift
     local nbins="$1";    shift
-    LOOPS="$1";          shift
-    CAST_PROFILER="$1";  shift
-    ROOT_DIR="$1";       shift
-    local date="$1";     shift
 
     declare -r LB_DIR="${ROOT_DIR}/lattice_bins"
     if [ "$date" == "fresh" ]; then
@@ -347,7 +358,7 @@ main()
 
     if [ ! -d $TMP_DIR ]; then
         # copying the benchmarks to a temporary directory
-        cp -r ${SRC_DIR} $TMP_DIR
+        cp -r ${SRC_DIR} ${TMP_DIR}
         mkdir -p "$TMP_DIR/partial"
 
         # logging

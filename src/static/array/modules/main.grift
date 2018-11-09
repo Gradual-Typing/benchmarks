@@ -1,0 +1,20 @@
+;;; ARRAY1 -- One of the Kernighan and Van Wyk benchmarks.
+
+(module main
+  (imports helpers)
+
+  (define (my-try [n : Int]) : Int
+    (vector-length (create-y (create-x n))))
+
+  (define (go [m : Int] [n : Int] [r : Int]) : Int
+    (if (> m 0)
+        (go (- m 1) n (my-try n))
+        r))
+
+  (define (main) : Unit
+    (let ([input1 : Int (read-int)])
+      (let ([input2 : Int (read-int)])
+        (begin (print-int (go input1 input2 0))
+               (display-char #\newline)))))
+
+  (time (main)))

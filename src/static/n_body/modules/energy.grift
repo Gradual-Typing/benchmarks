@@ -1,0 +1,32 @@
+(module energy
+  (imports system)
+  (exports energy)
+
+  (define (energy) : Float
+    (energy-loop-o 0 #i0.0))
+
+  (define (energy-loop-o [o : Int] [e : Float])
+    : Float
+    (if (= o *system-size*)
+        e
+        (let([o1 : (Vect Float) (vector-ref *system* o)])
+          (let ([sqs : Float (fl+ (fl+ (fl* (vector-ref o1 3) (vector-ref o1 3))
+                                       (fl* (vector-ref o1 4) (vector-ref o1 4)))
+                                  (fl* (vector-ref o1 5) (vector-ref o1 5)))])
+            (let ([e : Float (fl+ e (fl* (fl* 0.5 (vector-ref o1 6)) sqs))])
+              (energy-loop-i o o1 (+ o 1) e))))))
+
+  (define (energy-loop-i [o : Int] [o1 : (Vect Float)] [i : Int]  [e : Float])
+    : Float
+    (if (= i *system-size*)
+        (energy-loop-o (+ o 1) e)
+        (let ([i1 : (Vect Float) (vector-ref *system* i)])
+          (let ([dx : Float (fl- (vector-ref o1 0) (vector-ref i1 0))]
+                [dy : Float (fl- (vector-ref o1 1) (vector-ref i1 1))]
+                [dz : Float (fl- (vector-ref o1 2) (vector-ref i1 2))])
+            (let ([dist : Float (flsqrt (fl+ (fl+ (fl* dx dx) (fl* dy dy))
+                                             (fl* dz dz)))])
+              (let ([e : Float (fl- e (fl/ (fl* (vector-ref o1 6)
+                                                (vector-ref i1 6))
+                                           dist))])
+                (energy-loop-i o o1 (+ i 1) e))))))))

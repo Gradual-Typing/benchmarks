@@ -1,0 +1,63 @@
+(module system
+  (imports
+     body )
+  (exports
+     solar-mass
+     dt
+     *system*
+     *system-size* )
+
+  (define pi : Float #i3.141592653589793)
+  (define days-per-year : Float #i365.24)
+  (define solar-mass : Float (fl* (fl* #i4 pi) pi))
+  (define dt : Float 0.01)
+
+  (define *sun* : (Vect Float)
+    (make-body #i0.0 #i0.0 #i0.0 #i0.0 #i0.0 #i0.0 solar-mass))
+
+  (define *jupiter* : (Vect Float)
+    (make-body #i4.84143144246472090
+               #i-1.16032004402742839
+               #i-1.03622044471123109e-1
+               (fl* #i1.66007664274403694e-3 days-per-year)
+               (fl* #i7.69901118419740425e-3 days-per-year)
+               (fl* #i-6.90460016972063023e-5 days-per-year)
+               (fl* #i9.54791938424326609e-4 solar-mass)))
+
+  (define *saturn* : (Vect Float)
+    (make-body #i8.34336671824457987
+               #i4.12479856412430479
+               #i-4.03523417114321381e-1
+               (fl* #i-2.76742510726862411e-3 days-per-year)
+               (fl* #i4.99852801234917238e-3 days-per-year)
+               (fl* #i2.30417297573763929e-5 days-per-year)
+               (fl* #i2.85885980666130812e-4 solar-mass)))
+
+  (define *uranus* : (Vect Float)
+    (make-body #i1.28943695621391310e1
+               #i-1.51111514016986312e1
+               #i-2.23307578892655734e-1
+               (fl* #i2.96460137564761618e-03 days-per-year)
+               (fl* #i2.37847173959480950e-03 days-per-year)
+               (fl* #i-2.96589568540237556e-05 days-per-year)
+               (fl* #i4.36624404335156298e-05 solar-mass)))
+
+  (define *neptune* : (Vect Float)
+    (make-body #i1.53796971148509165e+01
+               #i-2.59193146099879641e+01
+               #i1.79258772950371181e-01
+               (fl* #i2.68067772490389322e-03 days-per-year)
+               (fl* #i1.62824170038242295e-03 days-per-year)
+               (fl* #i-9.51592254519715870e-05 days-per-year)
+               (fl* #i5.15138902046611451e-05 solar-mass)))
+
+  (define *system* : (Vect (Vect Float))
+    (let ([v : (Vect (Vect Float)) (vector 5 (vector 0 #i0.0))])
+      (begin (vector-set! v 0 *sun*)
+             (vector-set! v 1 *jupiter*)
+             (vector-set! v 2 *saturn*)
+             (vector-set! v 3 *uranus*)
+             (vector-set! v 4 *neptune*)
+             v)))
+
+  (define *system-size* : Int 5))

@@ -1,0 +1,32 @@
+(module sphere
+  (imports
+     point
+     math )
+  (exports
+     make-sphere
+     sphere-color
+     sphere-radius
+     sphere-center
+     defsphere
+     sphere-normal )
+
+  (define (make-sphere
+           [color : Float]
+           [radius : Float]
+           [center : (Tuple Float Float Float)]) : (Tuple Float Float (Tuple Float Float Float))
+    (tuple color radius center))
+
+  (define (sphere-color [s : (Tuple Float Float (Tuple Float Float Float))]) : Float
+    (tuple-proj s 0))
+  (define (sphere-radius [s : (Tuple Float Float (Tuple Float Float Float))]) : Float
+    (tuple-proj s 1))
+  (define (sphere-center [s : (Tuple Float Float (Tuple Float Float Float))]) : (Tuple Float Float Float)
+    (tuple-proj s 2))
+
+  (define (sphere-normal [s : (Tuple Float Float (Tuple Float Float Float))]
+                         [pt : (Tuple Float Float Float)]) : (Tuple Float Float Float)
+    (let ([c : (Tuple Float Float Float)
+             (sphere-center s)])
+      (unit-vector (fl- (point-x c) (point-x pt))
+                   (fl- (point-y c) (point-y pt))
+                   (fl- (point-z c) (point-z pt))))))

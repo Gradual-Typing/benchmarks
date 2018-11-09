@@ -1,0 +1,58 @@
+(module helper
+  (imports
+     math
+     point
+     sphere)
+  (exports loop)
+
+  (define (loop [pt : (Tuple Float Float Float)]
+                [ray : (Tuple Float Float Float)]
+                [index : Int]
+                [lst-len : Int]
+                [lst : (Vect (Tuple Float Float (Tuple Float Float Float)))]
+                [surface : (Tuple Float Float (Tuple Float Float Float))]
+                [hit : (Tuple Float Float Float)]
+                [dist : Float]) : (Tuple (Tuple Float Float (Tuple Float Float Float)) (Tuple Float Float Float))
+    (if (= index lst-len)
+        (tuple surface hit)
+        (let ([s : (Tuple Float Float (Tuple Float Float Float))
+                 (vector-ref lst index)])
+          (let ([xr : Float (point-x ray)]
+                [yr : Float (point-y ray)]
+                [zr : Float (point-z ray)]
+                [sc : (Tuple Float Float Float) (sphere-center s)])
+            (let ([a : Float (fl+ (sq xr) (fl+ (sq yr) (sq zr)))]
+                  [b : Float (fl* #i2.0
+                                  (fl+ (fl* (fl- (point-x pt) (point-x sc)) xr)
+                                       (fl+ (fl* (fl- (point-y pt) (point-y sc)) yr)
+                                            (fl* (fl- (point-z pt) (point-z sc)) zr))))]
+                  [c : Float (fl+ (fl+ (sq (fl- (point-x pt) (point-x sc)))
+                                       (sq (fl- (point-y pt) (point-y sc))))
+                                  (fl+ (sq (fl- (point-z pt) (point-z sc)))
+                                       (flnegate (sq (sphere-radius s)))))])
+              (if (fl= a #i0)
+                  (let ([n : Float (fl/ (flnegate c) b)])
+                    (let ([h : (Tuple Float Float Float)
+                             (make-point (fl+ (point-x pt) (fl* n xr))
+                                         (fl+ (point-y pt) (fl* n yr))
+                                         (fl+ (point-z pt) (fl* n zr)))])
+                      (let ([d : Float (distance h pt)])
+                        (if (fl< d dist)
+                            (loop pt ray (+ index 1) lst-len lst s h d)
+                            (loop pt ray (+ index 1) lst-len lst surface hit dist)))))
+                  (let ([disc : Float (fl- (sq b) (fl* #i4.0 (fl* a c)))])
+                    (if (fl< disc #i0.0)
+                        (loop pt ray (+ index 1) lst-len lst surface hit dist)
+                        (let ([discrt : Float (flsqrt disc)]
+                              (minus-b : Float (flnegate b))
+                              (two-a : Float (fl* #i2.0 a)))
+                          (let ([n : Float (flmin (fl/ (fl+ minus-b discrt) two-a)
+                                                  (fl/ (fl- minus-b discrt) two-a))])
+                            (let ([h : (Tuple Float Float Float)
+                                     (make-point (fl+ (point-x pt) (fl* n xr))
+                                                 (fl+ (point-y pt) (fl* n yr))
+                                                 (fl+ (point-z pt) (fl* n zr)))])
+                              (let ([d : Float (distance h pt)])
+                                (if (fl< d dist)
+                                    (loop pt ray (+ index 1) lst-len lst s h d)
+                                    (loop pt ray (+ index 1) lst-len lst surface hit dist)))))))))))))))

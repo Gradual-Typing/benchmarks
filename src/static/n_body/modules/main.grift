@@ -1,0 +1,64 @@
+(module main
+  (imports
+     system
+     momentum
+     energy )
+
+  (define (advance) : Unit
+    (advance-loop-o 0))
+
+  (define (advance-loop-o [o : Int]) : Unit
+    (if (= o *system-size*)
+        ()
+        (let ([o1 : (Vect Float) (vector-ref *system* o)])
+          (begin
+            (advance-loop-i (+ o 1)
+                            (vector-ref o1 3)
+                            (vector-ref o1 4)
+                            (vector-ref o1 5)
+                            o1)
+            (advance-loop-o (+ o 1))))))
+
+  (define (advance-loop-i [i3 : Int] [vx : Float]
+                          [vy : Float] [vz : Float]
+                          [o1 : (Vect Float)])
+    : Unit
+    (if (< i3 *system-size*)
+        (let ([i1 : (Vect Float) (vector-ref *system* i3)])
+          (let ([dx : Float (fl- (vector-ref o1 0) (vector-ref i1 0))]
+                [dy : Float (fl- (vector-ref o1 1) (vector-ref i1 1))]
+                [dz : Float (fl- (vector-ref o1 2) (vector-ref i1 2))]) 
+            (let ([dist2 : Float (fl+ (fl+ (fl* dx dx) (fl* dy dy)) (fl* dz dz))])
+              (let ([mag : Float (fl/ dt (fl* dist2 (flsqrt dist2)))])
+                (let ([dxmag : Float (fl* dx mag)]
+                      [dymag : Float (fl* dy mag)]
+                      [dzmag : Float (fl* dz mag)]
+                      [om : Float (vector-ref o1 6)]
+                      [im : Float (vector-ref i1 6)])
+                  (begin
+                    (vector-set! i1 3 (fl+ (vector-ref i1 3) (fl* dxmag om)))
+                    (vector-set! i1 4 (fl+ (vector-ref i1 4) (fl* dymag om)))
+                    (vector-set! i1 5 (fl+ (vector-ref i1 5) (fl* dzmag om)))
+                    (advance-loop-i (+ i3 1)
+                                    (fl- vx (fl* dxmag im))
+                                    (fl- vy (fl* dymag im))
+                                    (fl- vz (fl* dzmag im))
+                                    o1))))))) 
+        (begin (vector-set! o1 3 vx)
+               (vector-set! o1 4 vy)
+               (vector-set! o1 5 vz)
+               (vector-set! o1 0 (fl+ (vector-ref o1 0) (fl* dt vx)))
+               (vector-set! o1 1 (fl+ (vector-ref o1 1) (fl* dt vy)))
+               (vector-set! o1 2 (fl+ (vector-ref o1 2) (fl* dt vz)))
+               ())))
+
+  (define (main) : Unit
+    (begin
+      (offset-momentum)
+      (print-float (energy) 9)
+      (display-char #\newline)
+      (repeat (i 0 (read-int)) (a : Unit ()) (advance))
+      (print-float (energy) 9)
+      (display-char #\newline))) 
+
+  (time (main)))

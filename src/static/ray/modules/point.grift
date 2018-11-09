@@ -1,0 +1,17 @@
+(module point
+  (exports
+     make-point
+     point-x
+     point-y
+     point-z )
+
+  (define (make-point [x : Float] [y : Float] [z : Float])
+    : (Tuple Float Float Float)
+    (tuple x y z))
+
+  (define (point-x [p : (Tuple Float Float Float)]) : Float
+    (tuple-proj p 0))
+  (define (point-y [p : (Tuple Float Float Float)]) : Float
+    (tuple-proj p 1))
+  (define (point-z [p : (Tuple Float Float Float)]) : Float
+    (tuple-proj p 2)))

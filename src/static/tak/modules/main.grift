@@ -1,0 +1,13 @@
+;;; TAK -- A vanilla version of the TAKeuchi function.
+
+(module main
+  (imports tak)
+
+  (define (main) : Unit
+    (let ([x : Int (read-int)])
+      (let ([y : Int (read-int)])
+        (let ([z : Int (read-int)])
+          (begin (print-int (tak x y z))
+                 (display-char #\newline))))))
+
+  (time (main)))

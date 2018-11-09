@@ -1,0 +1,26 @@
+(module main
+  (imports kernel)
+
+  (define (create [l1 : Int] [l2 : Int]) : (Vect Int)
+    (let ([x : (Vect Int)
+             (vector (* l1 l2) 0)])
+      (begin
+        (repeat (i 0 l1) (_ : Unit ())
+                (repeat (j 0 l2) (_ : Unit ())
+                        (vector-set! x (+ (* l2 i) j) (+ j i))))
+        x)))
+
+  (define (main)
+    : Unit
+    (let ([size : Int (read-int)])
+      (let ([ar : Int size]
+            [ac : Int size]
+            [br : Int size]
+            [bc : Int size])
+        (let ([a : (Vect Int) (create ar ac)]
+              [b : (Vect Int) (create br bc)])
+          (begin
+            (print-int (vector-ref (mult a ar ac b br bc) (- (* ar bc) 1)))
+            (display-char #\newline))))))
+
+  (time (main)))

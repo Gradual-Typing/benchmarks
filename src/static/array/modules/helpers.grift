@@ -1,0 +1,19 @@
+(module helpers
+  (exports
+     create-x
+     create-y )
+
+  (define (create-x [n : Int]) : (Vect Int)
+    (let ([result : (Vect Int) (vector n 0)])
+      (begin
+        (repeat (i 0 n) (_ : Unit ())
+                (vector-set! result i i))
+        result)))
+
+  (define (create-y [x : (Vect Int)]) : (Vect Int)
+    (let ([n : Int (vector-length x)])
+      (let ([result : (Vect Int) (vector n 0)])
+        (begin
+          (repeat (i 0 n) (_ : Unit ())
+                  (vector-set! result (- (- n i) 1) (vector-ref x (- (- n i) 1))))
+          result)))))

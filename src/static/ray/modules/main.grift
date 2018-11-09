@@ -1,0 +1,104 @@
+;;; RAY -- Ray-trace a simple scene with spheres, generating a ".pgm" file.
+;;; Translated to Scheme from Paul Graham's book ANSI Common Lisp, Example 9.8
+;;; And then translated to Grift by Deyaaeldeen Almahallawi
+
+(module main
+  (imports
+     helper
+     math
+     point
+     sphere )
+
+  (define *world* : (Vect (Tuple Float Float (Tuple Float Float Float)))
+    (vector 33 (tuple #i0 #i0 (tuple #i0 #i0 #i0))))
+
+  (define eye : (Tuple Float Float Float) (make-point #i0.0 #i0.0 #i200.0))
+
+  (define (defsphere
+            [i : Int]
+            [x : Float]
+            [y : Float]
+            [z : Float]
+            [r : Float]
+            [c : Float]) : (Tuple Float Float (Tuple Float Float Float))
+    (let ([s : (Tuple Float Float (Tuple Float Float Float))
+             (make-sphere c r (make-point x y z))])
+      (begin
+        (vector-set! *world* i s)
+        s)))
+  
+  (define (tracer [res : Int]) : ()
+    (let ([extent : Int (* res 100)])
+      (begin
+        (display-char #\P)
+        (print-int 2)
+        (display-char #\space)
+        (print-int extent)
+        (display-char #\space)
+        (print-int extent)
+        (display-char #\space)
+        (print-int 255)
+        (display-char #\newline)
+        (repeat (y 0 extent) (_ : Unit ())
+                (repeat (x 0 extent) (_ : Unit ())
+                        (begin
+                          (print-int
+                           (color-at
+                            (fl+ #i-50.0
+                                 (fl/ (int->float x) (int->float res)))
+                            (fl+ #i-50.0
+                                 (fl/ (int->float y) (int->float res)))))
+                          (display-char #\newline)))))))
+
+  (define (color-at [x : Float] [y : Float]) : Int
+    (let ([ray : (Tuple Float Float Float)
+               (unit-vector (fl- x (point-x eye))
+                            (fl- y (point-y eye))
+                            (flnegate (point-z eye)))])
+      (float->int (flround (fl* (sendray eye ray) #i255.0)))))
+
+  (define (sendray [pt : (Tuple Float Float Float)]
+                   [ray : (Tuple Float Float Float)]) : Float
+    (let ([x : (Tuple (Tuple Float Float (Tuple Float Float Float)) (Tuple Float Float Float))
+             (loop pt ray 0
+                   (vector-length *world*)
+                   *world*
+                   (tuple #i0 #i0 (tuple #i0 #i0 #i0))
+                   (tuple #i0 #i0 #i0)
+                   #i1e308)])
+      (let ([s : (Tuple Float Float (Tuple Float Float Float))
+               (tuple-proj x 0)])
+        (let ([int : (Tuple Float Float Float)
+                   (tuple-proj x 1)])
+          (fl* (lambert s int ray)
+               (sphere-color s))))))
+
+  (define (lambert [s : (Tuple Float Float (Tuple Float Float Float))]
+                   [int : (Tuple Float Float Float)]
+                   [ray : (Tuple Float Float Float)]) : Float
+    (let ([n : (Tuple Float Float Float) (sphere-normal s int)])
+      (flmax #i0.0
+             (fl+ (fl* (point-x ray) (point-x n))
+                  (fl+ (fl* (point-y ray) (point-y n))
+                       (fl* (point-z ray) (point-z n)))))))
+
+  (define (main) : Unit
+    (begin
+      (defsphere 32 #i0.0 #i-300.0 #i-1200.0 #i200.0 #i0.8)
+      (defsphere 31 #i-80.0 #i-150.0 #i-1200.0 #i200.0 #i0.7)
+      (defsphere 30 #i70.0 #i-100.0 #i-1200.0 #i200.0 #i0.9)
+      (let ([counter : (Ref Int) (box 29)])
+        (repeat (x -2 3) (_ : Unit ())
+                (repeat (z 2 8) (_ : Unit ())
+                        (begin
+                          (defsphere
+                            (unbox counter)
+                            (fl* (int->float x) #i200.0)
+                            #i300.0
+                            (fl* (int->float z) #i-400.0)
+                            #i40.0
+                            #i0.75)
+                          (box-set! counter (- (unbox counter) 1))))))
+      (tracer 1)))
+
+  (time (main)))

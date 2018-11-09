@@ -1,0 +1,77 @@
+(module main
+  (imports loop1)
+
+  (define (loop3 [mmax : Int]
+                 [size : Int]
+                 [data : (Vect Float)])
+    : Unit
+    (if (< mmax size)
+        (let ([theta : Float (fl/ pi*2 (int->float mmax))])
+          (let ([wpr : Float
+                     (let ([x : Float (flsin (fl* #i0.5 theta))])
+                       (fl* #i-2.0 (fl* x x)))]
+                [wpi : Float (flsin theta)])
+            (begin
+              (loop4 #i1.0 #i0.0 0 mmax wpr wpi size data)
+              (loop3 (* mmax 2) size data))))
+        ()))
+
+  (define (loop4 [wr : Float]
+                 [wi : Float]
+                 [m : Int]
+                 [mmax : Int]
+                 [wpr : Float]
+                 [wpi : Float]
+                 [size : Int]
+                 [data : (Vect Float)])
+    : Unit
+    (if (< m mmax)
+        (loop5 m mmax wr wi m wpr wpi size data)
+        ()))
+
+  (define (loop5 [i : Int]
+                 [mmax : Int]
+                 [wr : Float]
+                 [wi : Float]
+                 [m : Int]
+                 [wpr : Float]
+                 [wpi : Float]
+                 [size : Int]
+                 [data : (Vect Float)])
+    : Unit
+    (if (< i size)
+        (let ([j : Int (+ i mmax)])
+          (let ([tempr : Float
+                       (fl-
+                        (fl* wr (vector-ref data j))
+                        (fl* wi (vector-ref data (+ j 1))))]
+                [tempi : Float
+                       (fl+
+                        (fl* wr (vector-ref data (+ j 1)))
+                        (fl* wi (vector-ref data j)))])
+            (begin
+              (vector-set! data j
+                           (fl- (vector-ref data i) tempr))
+              (vector-set! data (+ j 1)
+                           (fl- (vector-ref data (+ i 1)) tempi))
+              (vector-set! data i
+                           (fl+ (vector-ref data i) tempr))
+              (vector-set! data (+ i 1)
+                           (fl+ (vector-ref data (+ i 1)) tempi))
+              (loop5 (+ j mmax) mmax wr wi m wpr wpi size data))))
+        (loop4 (fl+ (fl- (fl* wr wpr) (fl* wi wpi)) wr)
+               (fl+ (fl+ (fl* wi wpr) (fl* wr wpi)) wi)
+               (+ m 2)
+               mmax wpr wpi size data)))
+  
+  (define (main) : Unit
+    (let ([n : Int (read-int)])
+      (let ([data : (Vect Float) (vector n #i0.0)])
+        ;; to compute the inverse, negate this value
+        (begin
+          (loop1 0 0 n data) ;; bit-reversal section
+          (loop3 2 n data)   ;; Danielson-Lanczos section
+          (print-float (vector-ref data 0) 10)
+          (display-char #\newline)))))
+
+  (time (main)))

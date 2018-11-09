@@ -1,0 +1,39 @@
+(module loop1
+  (exports
+     pi*2
+     loop1
+     data )
+
+  (define pi*2 : Float #i6.28318530717959)
+
+  (define (loop1 [i : Int]
+                 [j : Int]
+                 [size : Int]
+                 [data : (Vect Float)])
+    : Unit
+    (if (< i size)
+        (begin
+          (if (< i j)
+              (begin
+                (let ([temp : Float (vector-ref data i)])
+                  (begin
+                    (vector-set! data i (vector-ref data j))
+                    (vector-set! data j temp)))
+                (let ([temp : Float (vector-ref data (+ i 1))])
+                  (begin
+                    (vector-set! data (+ i 1)
+                                 (vector-ref data (+ j 1)))
+                    (vector-set! data (+ j 1) temp))))
+              ())
+          (loop2 (quotient size 2) j i size data))
+        ()))
+
+  (define (loop2 [m : Int]
+                 [j : Int]
+                 [i : Int]
+                 [size : Int]
+                 [data : (Vect Float)])
+    : Unit
+    (if (and (>= m 2) (>= j m))
+        (loop2 (quotient m 2) (- j m) i size data)
+        (loop1 (+ i 2) (+ j m) size data))))

@@ -1,0 +1,23 @@
+(module momentum
+  (imports system)
+  (exports offset-momentum)
+
+  (define (offset-momentum) : Unit
+    (offset-momentum-loop 0 #i0.0 #i0.0 #i0.0))
+
+  (define (offset-momentum-loop [i1 : Int] [px : Float]
+                                [py : Float] [pz : Float]) : Unit
+    (if (= i1 *system-size*)
+        (begin
+          (vector-set! (vector-ref *system* 0) 3
+                       (fl/ (fl- #i0.0 px) solar-mass))
+          (vector-set! (vector-ref *system* 0) 4
+                       (fl/ (fl- #i0.0 py) solar-mass))
+          (vector-set! (vector-ref *system* 0) 5
+                       (fl/ (fl- #i0.0 pz) solar-mass)))
+        (let ([j : (Vect Float) (vector-ref *system* i1)])
+          (offset-momentum-loop
+           (+ i1 1)
+           (fl+ px (fl* (vector-ref j 3) (vector-ref j 6)))
+           (fl+ py (fl* (vector-ref j 4) (vector-ref j 6)))
+           (fl+ pz (fl* (vector-ref j 5) (vector-ref j 6))))))))

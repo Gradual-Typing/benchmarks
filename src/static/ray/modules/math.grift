@@ -1,0 +1,22 @@
+(module math
+  (exports
+     sq
+     mag
+     unit-vector
+     distance )
+
+  (define (sq [x : Float]) : Float
+    (fl* x x))
+
+  (define (mag [x : Float] [y : Float] [z : Float]) : Float
+    (flsqrt (fl+ (sq x) (fl+ (sq y) (sq z)))))
+
+  (define (unit-vector [x : Float] [y : Float] [z : Float]) : (Tuple Float Float Float)
+    (let ([d : Float (mag x y z)])
+      (make-point (fl/ x d) (fl/ y d) (fl/ z d))))
+
+  (define (distance [p1 : (Tuple Float Float Float)]
+                    [p2 : (Tuple Float Float Float)]) : Float
+    (mag (fl- (point-x p1) (point-x p2))
+         (fl- (point-y p1) (point-y p2))
+         (fl- (point-z p1) (point-z p2)))))

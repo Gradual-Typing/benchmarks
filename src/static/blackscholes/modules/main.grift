@@ -1,0 +1,96 @@
+(module main
+  (imports blackscholes)
+
+  (define (make-option [spot-price : Float]
+                       [strike-price : Float]
+                       [rfi-rate : Float]
+                       [divr : Float]
+                       [volatility : Float]
+                       [time : Float]
+                       [option-type : Char]
+                       [divs : Float]
+                       [DerivGem-value : Float])
+    : (Tuple Float Float Float Float 
+             Float Float Char Float Float)
+    (tuple spot-price strike-price rfi-rate
+           divr volatility time option-type
+           divs DerivGem-value))
+
+  (define (read-option-type) : Char
+    (let ([c : Char (read-char)])
+      (if (= (char->int c) (char->int #\P))
+          c
+          (if (= (char->int c) (char->int #\C))
+              c
+              (if (= (char->int c) (char->int #\space))
+                  (read-char)
+                  (read-char))))));; raise error?
+
+  (define (read-option)
+    : (Tuple Float Float Float Float 
+             Float Float Char Float Float)
+    (let ([spot-price : Float (read-float)])
+      (let ([strike-price : Float (read-float)])
+        (let ([rfi-rate : Float (read-float)])
+          (let ([dividend-rate : Float (read-float)])
+            (let ([volatility : Float (read-float)])
+              (let ([maturity-len : Float (read-float)])
+                (let ([option-type : Char (read-option-type)])
+                  (let ([divs : Float (read-float)])
+                    (let ([DerivGem-value : Float (read-float)])
+                      (make-option spot-price strike-price rfi-rate
+                                   dividend-rate volatility maturity-len
+                                   option-type divs DerivGem-value)))))))))))
+
+  (define number-of-runs : Int 100)
+
+  (define (main) : Unit
+    (let ([number-of-options : Int (read-int)]
+          [fake-data
+           : (Tuple Float Float Float Float 
+                    Float Float Char Float Float)
+           (tuple #i0 #i0 #i0 #i0 #i0 #i0 #\P #i0 #i0)])
+      (let ([data
+             : (Vect (Tuple Float Float Float Float Float Float Char Float Float))
+             (vector number-of-options fake-data)]
+            [spots : (Vect Float) (vector number-of-options #i0)]
+            [strikes : (Vect Float) (vector number-of-options #i0)]
+            [rates : (Vect Float) (vector number-of-options #i0)]
+            [volatilities : (Vect Float) (vector number-of-options #i0)]
+            [otypes : (Vect Int) (vector number-of-options 0)]
+            [otimes : (Vect Float) (vector number-of-options #i0)])
+        (begin
+          (repeat (i 0 number-of-options) (_ : Unit ()) 
+                  (vector-set! data i (read-option)))
+          (repeat (i 0 number-of-options) (_ : Unit ())
+                  (let ([od : (Tuple Float Float Float Float 
+                                     Float Float Char Float Float)
+                            (vector-ref data i)])
+                    (begin
+                      (vector-set! otypes i
+                                   (if (= (char->int (tuple-proj od 6))
+                                          (char->int #\P))
+                                       1
+                                       0))
+                      (vector-set! spots i (tuple-proj od 0))
+                      (vector-set! strikes i (tuple-proj od 1))
+                      (vector-set! rates i (tuple-proj od 2))
+                      (vector-set! volatilities i (tuple-proj od 4))
+                      (vector-set! otimes i (tuple-proj od 5)))))
+          (let ([prices : (Vect Float) (vector number-of-options #i0)])
+            (begin
+              (repeat (j 0 number-of-runs) (_ : Unit ())
+                      (repeat (i 0 number-of-options) (_ : Unit ())
+                              (vector-set! prices i
+                                           (black-scholes (vector-ref spots i)
+                                                          (vector-ref strikes i)
+                                                          (vector-ref rates i)
+                                                          (vector-ref volatilities i)
+                                                          (vector-ref otimes i)
+                                                          (vector-ref otypes i)
+                                                          #i0))))
+              (repeat (i 0 number-of-options) (_ : Unit ())
+                      (begin (print-float (vector-ref prices i) 18)
+                             (display-char #\newline)))))))))
+
+  (time (main)))

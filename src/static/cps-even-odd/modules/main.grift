@@ -1,0 +1,14 @@
+(module main
+  (imports even)
+
+  (define (odd? [n : Int] [k : (Bool -> Bool)]) : Bool
+    (if (= n 0)
+        (k #f)
+        (even? (- n 1) k)))
+
+  (define (empty-k [k : Bool]) : Bool k)
+
+  (define (main)
+    (print-bool (even? (read-int) empty-k)))
+
+  (time (main)))

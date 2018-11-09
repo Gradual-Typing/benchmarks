@@ -1,0 +1,29 @@
+(module helpers
+  (exports partition)
+
+  (define (partition [a : (Vect Int)]
+                     [p : Int]
+                     [r : Int])
+    : Int
+    (let ([i : (Ref Int) (box (- p 1))]
+          [x : Int (vector-ref a r)])
+      (begin
+        (repeat (j p r) (_ : Unit ())
+                (if (<= (vector-ref a j) x)
+                    (begin
+                      (box-set! i (+ (unbox i) 1))
+                      (swap a (unbox i) j))
+                    ()))
+        (swap a (+ (unbox i) 1) r)
+        (+ (unbox i) 1))))
+
+  (define (swap [a : (Vect Int)]
+                [i : Int]
+                [j : Int])
+    : Unit
+    (if (= i j)
+        ()
+        (let ([t : Int (vector-ref a i)])
+          (begin
+            (vector-set! a i (vector-ref a j))
+            (vector-set! a j t))))))

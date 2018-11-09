@@ -104,7 +104,7 @@ function plot_one_config_benchmark()
             `"set terminal pngcairo size 1280,960"`
             `"   enhanced color font 'Verdana,26' ;"`
             `"set output '${runtime_fig}';"`
-            `"set key opaque bottom left box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
             `"set title \"${printname}\";"`
    	    `"stats '${config_log_sorted}' nooutput;"`
 	    `"set xrange [0:STATS_records+10];"`
@@ -159,7 +159,7 @@ function plot_one_config_benchmark()
             `"plot '${config_log_sorted}' using 0:7 with points"` 
             `"   pt 9 ps 3 lc rgb '$color' title 'Grift';"`
 	    `"unset xtics; unset xlabel;"`
-            `"set key opaque bottom left box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
@@ -208,7 +208,7 @@ function plot_one_config_benchmark()
 	    `"unset key;"`
             `"plot '${config_log_sorted}' using 0:7 with points"` 
             `"   pt 9 ps 3 lc rgb '$color' title 'Grift';"`
-            `"set key opaque bottom left box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
@@ -378,7 +378,7 @@ function plot_two_configs_benchmark()
             `"set terminal pngcairo size 1280,960"`
             `"   enhanced color font 'Verdana,26' ;"`
             `"set output '${runtime_fig}';"`
-            `"set key opaque bottom left box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
             `"set title \"${printname}\";"`
    	    `"stats '${config1_log_sorted}' nooutput;"`
 	    `"set xrange [0:STATS_records+10];"`
@@ -439,7 +439,7 @@ function plot_two_configs_benchmark()
             `"'${config2_log_sorted}' using 0:7 with points"`
             `"   pt 6 ps 3 lc rgb '$color2' title '${c2t}';"`
 	    `"unset xtics; unset xlabel;"`
-            `"set key opaque bottom left box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
@@ -494,7 +494,7 @@ function plot_two_configs_benchmark()
             `"   pt 9 ps 3 lc rgb '$color1' title '${c1t}',"`
             `"'${config2_log_sorted}' using 0:7 with points"`
             `"   pt 6 ps 3 lc rgb '$color2' title '${c2t}';"`
-            `"set key opaque bottom left box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`

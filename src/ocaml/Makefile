@@ -1,6 +1,6 @@
 .PHONY: clean all
 
-targets=array fft n_body ray blackscholes matmult quicksort tak
+targets=array fft n_body ray blackscholes matmult quicksort tak sieve
 
 all: $(targets)
 

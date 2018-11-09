@@ -1,6 +1,6 @@
 .PHONY: clean all
 
-BENCHS=array fft n_body ray blackscholes matmult quicksort tak
+BENCHS=array fft n_body ray blackscholes matmult quicksort tak sieve
 targets=$(foreach bench,$(BENCHS),$(addsuffix .so, $(bench)))
 
 all: $(targets)

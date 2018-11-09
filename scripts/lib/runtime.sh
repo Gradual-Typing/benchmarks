@@ -112,10 +112,10 @@ get_chezscheme_runtime()
 get_static_grift_runtime()
 {
     local benchmark="$1";      shift
-    local input="$1"; shift
+    local input="$1";          shift
     local disk_aux_name="$1";  shift
     
-    local benchmark_path="${TMP_DIR}/static/${benchmark}"
+    local benchmark_path="${TMP_DIR}/static/${benchmark}/single/${benchmark}"
     local runtimes_file="${benchmark_path}${disk_aux_name}.static.runtimes"
     local cache_file="${benchmark_path}${disk_aux_name}.static.runtime"
 

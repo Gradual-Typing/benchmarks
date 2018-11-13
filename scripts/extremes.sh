@@ -20,11 +20,21 @@ write_grift_speedups()
     local name="$1";            shift
     local benchmark_args="$1";  shift
     local disk_aux_name="$1";   shift
-    local dir="$1";             shift
+    local mode="$1";            shift # static or dyn
     local logfile="$1";         shift
-    
+
+    local benchmark_path=""
+    if [ "$mode" = "static" ]; then
+	benchmark_path="${TMP_DIR}/${mode}/${name}/single/${name}"
+    elif [ "$mode" = "dyn" ]; then
+	 benchmark_path="${TMP_DIR}/${mode}/${name}"
+    else
+	echo "invalid mode"
+	exit -1
+    fi
+
     for config_index in ${CONFIGS[@]}; do
-        get_grift_speedup $baseline_system "${TMP_DIR}/${dir}/${name}"\
+        get_grift_speedup $baseline_system "$benchmark_path"\
                           "$benchmark_args" "$disk_aux_name" $config_index
         printf ",$RETURN" >> $logfile
         echo "grift $config_index speedup: $RETURN"

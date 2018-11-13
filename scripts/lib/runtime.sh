@@ -142,7 +142,7 @@ get_static_grift_runtime()
 get_grift_runtimes()
 {
     local benchmark_path="$1"; shift
-    local input="$1"; shift
+    local input="$1";          shift
     local disk_aux_name="$1";  shift
 
     local runtimes_file="${benchmark_path}${disk_aux_name}.runtimes"
@@ -168,7 +168,7 @@ get_grift_runtimes()
 get_grift_runtime()
 {
     local benchmark_path="$1"; shift
-    local input="$1"; shift
+    local input="$1";          shift
     local disk_aux_name="$1";  shift
     local config_index="$1";   shift
     local benchmark="$(basename $benchmark_path)"

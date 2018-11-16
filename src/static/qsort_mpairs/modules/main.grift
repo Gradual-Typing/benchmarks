@@ -1,0 +1,29 @@
+(module main
+  (imports helpers)
+
+  (define (sort [a : (Vect (Vect Int))] [p : Int] [r : Int])
+    : Unit
+    (if (< p r)
+        (let ([q : Int (partition a p r)])
+          (begin
+            (sort a p (- q 1))
+            (sort a (+ q 1) r)))
+        ()))
+
+  (define (main)
+    : Unit
+    (let ([size : Int (read-int)])
+      (let ([pair : (Vect Int) (vector 2 0)])
+        (vector-set! pair 0 (read-int))
+        (vector-set! pair 1 (read-int))
+        (let ([a : (Vect (Vect Int)) (vector size pair)])
+          (repeat (i 1 size) (_ : Unit ())
+            (let ([pair : (Vect Int) (vector 2 0)])
+              (vector-set! pair 0 (read-int))
+              (vector-set! pair 1 (read-int))
+              (vector-set! a i pair)))
+          (sort a 0 (- size 1))
+          (print-int (vector-ref (vector-ref a 0) 1))
+          (display-char #\newline)))))
+
+  (time (main)))

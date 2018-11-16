@@ -1,0 +1,62 @@
+(define (mpair<= [p1 : Dyn] [p2 : Dyn]) : Dyn
+  (let ([p1-fst : Dyn (vector-ref p1 0)]
+        [p2-fst : Dyn (vector-ref p2 0)])
+    (cond
+      [(< p1-fst p2-fst)
+       #t]
+      [(= p1-fst p2-fst)
+       (<= (vector-ref p1 1) (vector-ref p2 1))]
+      [else #f])))
+
+(define (partition [a : Dyn]
+                   [p : Dyn]
+                   [r : Dyn])
+  : Dyn
+  (let ([i : Dyn (box (- p 1))]
+        [x : Dyn (vector-ref a r)])
+    (repeat (j p r) (_ : Dyn ())
+      (if (mpair<= (vector-ref a j) x)
+          (begin
+            (box-set! i (+ (unbox i) 1))
+            (swap a (unbox i) j))
+          ())) 
+    (swap a (+ (unbox i) 1) r)
+    (+ (unbox i) 1)))
+
+(define (swap [a : Dyn]
+              [i : Dyn]
+              [j : Dyn])
+  : Dyn
+  (if (= i j)
+      ()
+      (let ([t : Dyn (vector-ref a i)])
+        (begin
+          (vector-set! a i (vector-ref a j))
+          (vector-set! a j t)))))
+
+(define (sort [a : Dyn] [p : Dyn] [r : Dyn])
+  : Dyn
+  (if (< p r)
+      (let ([q : Dyn (partition a p r)])
+        (begin
+          (sort a p (- q 1))
+          (sort a (+ q 1) r)))
+      ()))
+
+(define (main)
+  : Unit
+  (let ([size : Dyn (read-int)])
+    (let ([pair : Dyn (vector 2 (ann 0 Dyn))])
+      (vector-set! pair 0 (read-int))
+      (vector-set! pair 1 (read-int))
+      (let ([a : Dyn (vector size pair)])
+        (repeat (i 1 size) (_ : Dyn ())
+          (let ([pair : Dyn (vector 2 0)])
+            (vector-set! pair 0 (read-int))
+            (vector-set! pair 1 (read-int))
+            (vector-set! a i pair)))
+        (sort a 0 (- size 1))
+        (print-int (vector-ref (vector-ref a 0) 1))
+        (display-char #\newline)))))
+
+(time (main))

@@ -1,0 +1,62 @@
+(define (mpair<= [p1 : (Vect Int)] [p2 : (Vect Int)]) : Bool
+  (let ([p1-fst (vector-ref p1 0)]
+        [p2-fst (vector-ref p2 0)])
+    (cond
+      [(< p1-fst p2-fst)
+       #t]
+      [(= p1-fst p2-fst)
+       (<= (vector-ref p1 1) (vector-ref p2 1))]
+      [else #f])))
+
+(define (partition [a : (Vect (Vect Int))]
+                   [p : Int]
+                   [r : Int])
+  : Int
+  (let ([i : (Ref Int) (box (- p 1))]
+        [x : (Vect Int) (vector-ref a r)])
+    (repeat (j p r) (_ : Unit ())
+      (if (mpair<= (vector-ref a j) x)
+          (begin
+            (box-set! i (+ (unbox i) 1))
+            (swap a (unbox i) j))
+          ())) 
+    (swap a (+ (unbox i) 1) r)
+    (+ (unbox i) 1)))
+
+(define (swap [a : (Vect (Vect Int))]
+              [i : Int]
+              [j : Int])
+  : Unit
+  (if (= i j)
+      ()
+      (let ([t : (Vect Int) (vector-ref a i)])
+        (begin
+          (vector-set! a i (vector-ref a j))
+          (vector-set! a j t)))))
+
+(define (sort [a : (Vect (Vect Int))] [p : Int] [r : Int])
+  : Unit
+  (if (< p r)
+      (let ([q : Int (partition a p r)])
+        (begin
+          (sort a p (- q 1))
+          (sort a (+ q 1) r)))
+      ()))
+
+(define (main)
+  : Unit
+  (let ([size : Int (read-int)])
+    (let ([pair : (Vect Int) (vector 2 0)])
+      (vector-set! pair 0 (read-int))
+      (vector-set! pair 1 (read-int))
+      (let ([a : (Vect (Vect Int)) (vector size pair)])
+        (repeat (i 1 size) (_ : Unit ())
+          (let ([pair : (Vect Int) (vector 2 0)])
+            (vector-set! pair 0 (read-int))
+            (vector-set! pair 1 (read-int))
+            (vector-set! a i pair)))
+        (sort a 0 (- size 1))
+        (print-int (vector-ref (vector-ref a 0) 1))
+        (display-char #\newline)))))
+
+(time (main))

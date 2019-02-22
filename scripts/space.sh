@@ -134,7 +134,7 @@ function main()
     DATA_DIR=$SPACE_DIR/data
     OUT_DIR=$SPACE_DIR/output
     TMP_DIR=$SPACE_DIR/tmp
-    SRC_DIR=$TEST_DIR/src/partial
+    SRC_DIR=$TEST_DIR/src/leaking
 
     # create the result directory if it does not exist
     mkdir -p $DATA_DIR

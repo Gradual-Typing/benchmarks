@@ -2,16 +2,16 @@
 
 # computes speedup ranges for different configurations in the internal
 # comparisons it expects the same directory structure as the one for
-# lattice_bins where the main directory is named temp and it needs temp/data,
+# partial where the main directory is named temp and it needs temp/data,
 # temp/tmp/dyn, temp/tmp/static, and maybe temp/tmp/racket if you assume racket
 # as the baseline
 
 function main()
 {
     declare -r TEST_DIR=".."
-    declare -r LIB_DIR="$TEST_DIR/lib"
-    declare -r LB_DIR="$TEST_DIR/lattice_bins"
-    declare -r EXP_DIR="$LB_DIR/temp"
+    declare -r LIB_DIR="lib"
+    declare -r LB_DIR="$TEST_DIR/results/grift/partial/fine"
+    declare -r EXP_DIR="$LB_DIR/${BENCHMARK_DIR}"
     declare -r DATA_DIR="$EXP_DIR/data"
     declare -r OUT_DIR="$EXP_DIR/output"
     declare -r SRC_DIR="$EXP_DIR/src/partial"
@@ -22,17 +22,17 @@ function main()
         exit 1
     fi
 
-    . ${TEST_DIR}/lib/runtime.sh
+    . lib/runtime.sh
 
     local baseline_system=get_dyn_grift_17_runtime
     # local baseline_system=get_racket_runtime
 
-    run_double 19 17
+    # run_double 19 17
     run_double 17 7
-    run_double 17 13
-    run_double 17 8
+    # run_double 17 13
+    # run_double 17 8
     
-    run_single $baseline_system 19
+    # run_single $baseline_system 19
     run_single $baseline_system 17
     run_single $baseline_system 7
 }
@@ -51,8 +51,11 @@ function run_double()
     local c2t=$(echo $config_str | sed -n 's/.*,\(.*\),.*/\1/p;q')
     local ct=$(echo $config_str | sed -n 's/.*,.*,\(.*\)/\1/p;q')
 
-    # Blackscholes
+    # sieve
     run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "blackscholes" "in_4K.txt"
+
+    # Blackscholes
+    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "sieve" "fast.txt"
 
     # Quicksort
     run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "quicksort" "in_descend1000.txt"
@@ -72,6 +75,7 @@ function run_double()
     # Tak
     run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "tak" "slow.txt"
 
+    # ray
     run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "ray" "empty.txt"
 
     echo "finished comparing $c1t to $c2t with $ct, where speedups range from "\
@@ -185,8 +189,6 @@ function run_two_benchmarks()
     local logfile3="${logfile1}.sorted1"
     local logfile4="${logfile2}.sorted1"
 
-    # delete the extension from file names in the logfile so that we can sort them
-    #tail -n +2 "$logfile1" | sed "s/.o${c1}//1" | sort -k1 -n -t, > "${logfile3}"
     tail -n +2 "$logfile1" | sort -k1 -n -t, > "${logfile3}"
     tail -n +2 "$logfile2" | sort -k1 -n -t, > "${logfile4}"
 
@@ -197,7 +199,7 @@ function run_two_benchmarks()
     paste -d , "$tmp1_logfile" "$tmp2_logfile" > "$tmp3_logfile"
 
     # compute speedup of the first config over the second
-    awk  -F "," '{printf "%4.2f\n", $2/$1 }' "$tmp3_logfile" > "$tmp4_logfile"
+    awk  -F "," '{printf "%4.5f\n", $2/$1 }' "$tmp3_logfile" > "$tmp4_logfile"
 
     # extract file names
     awk -F"," 'BEGIN { OFS = "," } {print $1}' "$logfile3" > "$tmp5_logfile"

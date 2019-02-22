@@ -1,4 +1,5 @@
 (module math
+  (imports point)
   (exports
      sq
      mag

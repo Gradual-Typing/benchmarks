@@ -33,10 +33,10 @@ main()
     
     
     declare -r TEST_DIR=".."
-    declare -r EXP1_DIR="$TEST_DIR/extremes/$expirement1"
+    declare -r EXP1_DIR="$TEST_DIR/results/grift/external/$expirement1"
     declare -r DATA1_DIR="$EXP1_DIR/data"
     declare -r OUT1_DIR="$EXP1_DIR/output"
-    declare -r EXP2_DIR="$TEST_DIR/extremes/$expirement2"
+    declare -r EXP2_DIR="$TEST_DIR/results/grift/external/$expirement2"
     declare -r DATA2_DIR="$EXP2_DIR/data"
     declare -r OUT2_DIR="$EXP2_DIR/output"
 

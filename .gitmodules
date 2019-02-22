@@ -1,0 +1,3 @@
+[submodule "typed_racket_benchmarks"]
+	path = typed_racket_benchmarks
+	url = https://github.com/Gradual-Typing/gtp-benchmarks.git

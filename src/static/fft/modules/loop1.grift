@@ -1,8 +1,7 @@
 (module loop1
   (exports
      pi*2
-     loop1
-     data )
+     loop1 )
 
   (define pi*2 : Float #i6.28318530717959)
 

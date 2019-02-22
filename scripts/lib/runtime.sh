@@ -17,8 +17,8 @@ get_racket_runtime()
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
-        raco make "${benchmark_path}.rkt"
-        avg "racket ${benchmark_path}.rkt"\
+        raco make "${benchmark_path}/modules/"*".rkt"
+        avg "racket ${benchmark_path}/modules/main.rkt"\
             "${INPUT_DIR}/${benchmark}/${input}"\
             "racket" "${OUTPUT_DIR}/racket/${benchmark}/${input}" \
             "$runtimes_file"
@@ -41,10 +41,31 @@ get_typed_racket_runtime()
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
-        raco make "${benchmark_path}.rkt"
-        avg "racket ${benchmark_path}.rkt"\
+        raco make "${benchmark_path}/modules/"*".rkt"
+        avg "racket ${benchmark_path}/modules/main.rkt"\
             "${INPUT_DIR}/${benchmark}/${input}"\
             "typed_racket" "${OUTPUT_DIR}/typed_racket/${benchmark}/${input}"\
+            "$runtimes_file"
+        echo "$RETURN" > "$cache_file"
+    fi
+}
+
+get_typed_racket_config_runtime()
+{
+    local benchmark_name="$1"; shift
+    local config_dir="$1";     shift
+    local input="$1";          shift
+    local disk_aux_name="$1";  shift
+    
+    local runtimes_file="${config_dir}${disk_aux_name}.runtimes"
+    local cache_file="${config_dir}${disk_aux_name}.runtime"
+    if [ -f $cache_file ]; then
+        RETURN=$(cat "$cache_file")
+    else
+        raco make "${config_dir}"*".rkt"
+        avg "racket ${config_dir}main.rkt"\
+            "${INPUT_DIR}/${benchmark_name}/${input}"\
+            "typed_racket" "${OUTPUT_DIR}/typed_racket/${benchmark_name}/${input}"\
             "$runtimes_file"
         echo "$RETURN" > "$cache_file"
     fi

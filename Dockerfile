@@ -40,7 +40,7 @@ RUN pacman --quiet --noconfirm -S stack
 RUN pacman --quiet --noconfirm -S clang
 
 # Invalidate Cache so that a fresh Grift is Installed.
-ARG CACHE_DATE=not_a_date
+# ARG CACHE_DATE=not_a_date # Commented out for PLDI Artifact
 
 # installing Grift
 RUN raco pkg install --no-setup \

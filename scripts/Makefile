@@ -51,7 +51,8 @@ test_external:
 
 test: test_coarse test_fine test_external create_figs
 
-release-fast: INPUT_TYPE=test TIMING_SAMPLES=1 $(MAKE) release
+release-fast:
+	INPUT_TYPE=test TIMING_SAMPLES=1 $(MAKE) release
 
 clean:
 	find external results -executable -and \( -not -type d \) -delete

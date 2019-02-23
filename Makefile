@@ -1,4 +1,4 @@
-IMAGE_NAME=benchmarks
+IMAGE_NAME=dalmahal90/grift-benchmarks:pldi
 CONTAINER_NAME=benchmarks_container
 HOST_EXPERIMENT_DIR=/home/$(USER)/experiments
 CONTAINER_EXPERIMENT_DIR=/app/experiments

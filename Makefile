@@ -91,7 +91,7 @@ debug_bench: build-unset-arg typed_racket_benchmarks/.git setup_dir attach
 debug_nocache: build-no-cache typed_racket_benchmarks/.git setup_dir attach
 
 test: typed_racket_benchmarks/.git setup_dir run-test rm_container
-       cp ~/experiments/Fig* ~/Desktop/
+	cp ~/experiments/Fig* ~/Desktop/
 
 test-coarse: typed_racket_benchmarks/.git setup_dir run-test-coarse rm_container
 
@@ -100,10 +100,10 @@ test-fine: typed_racket_benchmarks/.git setup_dir run-test-fine rm_container
 test-external: typed_racket_benchmarks/.git setup_dir run-test-external rm_container
 
 release-fast: typed_racket_benchmarks/.git setup_dir run-release-fast rm_container
-       cp ~/experiments/Fig* ~/Desktop/
+	cp ~/experiments/Fig* ~/Desktop/
 
 release: typed_racket_benchmarks/.git setup_dir run-release rm_container
-       cp ~/experiments/Fig* ~/Desktop/
+	cp ~/experiments/Fig* ~/Desktop/
 
 rm_container:
 	docker rm $(CONTAINER_NAME)

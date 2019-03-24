@@ -5,12 +5,10 @@ RUN pacman --quiet --noconfirm -S base-devel git sudo time wget nano inetutils
 
 WORKDIR /app
 
-# installing Racket and Typed Racket
-# RUN pacman --quiet --noconfirm -S racket
-
-RUN wget https://mirror.racket-lang.org/installers/7.0/racket-7.0-x86_64-linux.sh \
-    && chmod a+x racket-7.0-x86_64-linux.sh \
-    && ./racket-7.0-x86_64-linux.sh --in-place --dest /root/racket
+ENV Racket_VER=7.2
+RUN wget https://mirror.racket-lang.org/installers/${Racket_VER}/racket-${Racket_VER}-x86_64-linux.sh \
+    && chmod a+x racket-${Racket_VER}-x86_64-linux.sh \
+    && ./racket-${Racket_VER}-x86_64-linux.sh --in-place --dest /root/racket
 ENV PATH="/root/racket/bin:$PATH"
 
 # installing Gambit-C compiler for Scheme
@@ -49,7 +47,7 @@ WORKDIR /app/Grift
 RUN git checkout port-from-tr
 RUN raco setup grift
 WORKDIR /app
-ENV PATH="/root/.racket/7.0/bin/:$PATH"
+ENV PATH="/root/.racket/$(Racket_VER)/bin/:$PATH"
 
 # installing the Dynamizer
 RUN git clone https://github.com/Gradual-Typing/Dynamizer.git \

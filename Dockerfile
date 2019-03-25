@@ -56,23 +56,15 @@ RUN pacman --quiet --noconfirm -S libx11 \
 # installing utilities for the experiments
 # sice machines run kernel 3.10 which causes problems with Qt5
 # see https://bbs.archlinux.org/viewtopic.php?pid=1755257#p1755257
+ENV LIBS="-lgobject-2.0"
 RUN pacman --quiet --noconfirm -S cairo fribidi python libcerf harfbuzz libthai \
     	   libxft gtk-doc glib2 gobject-introspection help2man meson gd pango \
-	   cantarell-fonts ttf-dejavu
-    # && wget http://downloads.sourceforge.net/sourceforge/gnuplot/gnuplot-5.2.6.tar.gz \
-    # && tar -zxvf gnuplot-5.2.6.tar.gz && cd gnuplot-5.2.6 \
-    # && ldconfig \
-    # && ./configure --disable-wxwidgets --with-qt=no --with-x --with-readline=gnu \
-    # && make -j 8 && make install
-
-# ENV HomeDocker /home/docker
-# RUN useradd -m --uid 1000 -G wheel -d ${HomeDocker} -p 1234 -s /bin/bash docker \
-#     && echo " %wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-# USER docker
-# RUN mkdir ~/tmp && cd ~/tmp && git clone https://aur.archlinux.org/yay.git \
-#     && cd yay && makepkg --noconfirm -si
-# RUN cd ~/tmp && yay --quiet --noconfirm -S gnuplot-nogui
-# USER root
+	   cantarell-fonts ttf-dejavu \
+    && wget http://downloads.sourceforge.net/sourceforge/gnuplot/gnuplot-5.2.6.tar.gz \
+    && tar -zxvf gnuplot-5.2.6.tar.gz && cd gnuplot-5.2.6 \
+    && ldconfig \
+    && ./configure --disable-wxwidgets --with-qt=no --with-x --with-readline=gnu \
+    && make -j 8 && make install
 
 ARG EXPR_DIR=not_a_path
 

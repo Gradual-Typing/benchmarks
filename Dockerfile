@@ -51,7 +51,8 @@ RUN pacman --quiet --noconfirm -S imagemagick
 # installing Chez Scheme
 RUN pacman --quiet --noconfirm -S libx11 \
     && git clone https://github.com/cisco/ChezScheme.git \
-    && cd ChezScheme && ./configure --threads && make -j 4 && make install
+    && cd ChezScheme && ./configure --threads --installschemename=chez-scheme \
+    && make -j 4 && make install
 
 # installing utilities for the experiments
 # sice machines run kernel 3.10 which causes problems with Qt5

@@ -1,9 +1,10 @@
+(* 3/25/2019 adding type annotations *)
 
 let run_benchmark () =
   let n = read_int () in
-  let data = Array.make n 0.0 in
+  let data : float array = Array.make n 0.0 in
   let pi_2 = 6.28318530717959 in
-  let rec loop i j =
+  let rec loop (i : int) (j : int) =
     if i < n
     then
       ((if i < j then
@@ -15,11 +16,11 @@ let run_benchmark () =
           data.(i+1) <- data.(j + 1);
           data.(j+1) <- tmp);
        loop2 (n/2) j i)
-  and loop2 m j i =
+  and loop2 (m : int) (j : int) (i : int) =
     if (m >= 2) && (j >= m)
     then loop2 (m/2) (j-m) i
     else loop (i+2) (j+m)
-  and loop3 mmax =
+  and loop3 (mmax : int) =
     if mmax < n then
       let theta = pi_2 /. (float_of_int mmax) in
       let wpr = let x = sin (0.5 *. theta) in
@@ -27,7 +28,7 @@ let run_benchmark () =
       let wpi = sin theta in
       loop4 1.0 0.0 0 mmax wpr wpi;
       loop3 (mmax * 2)
-  and loop4 wr wi m mmax wpr wpi =
+  and loop4 (wr : float) (wi : float) (m : int) (mmax : int) (wpr : float) (wpi : float) =
     if m < mmax then
       loop5 m mmax wr wi m wpr wpi
   and loop5 i mmax wr wi m wpr wpi =

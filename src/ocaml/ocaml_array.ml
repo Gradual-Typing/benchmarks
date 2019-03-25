@@ -2,14 +2,16 @@
 (* ARRAY1 -- One of the Kernighan and Van Wyk benchmarks. *)
 (* 9/27/2017 added types to support typed-racket by Andre Kuhlenschmidt *)
 (* 9/28/2017 ported to ocaml *)
-let create_x n =
+(* 3/25/2019 adding type annotations *)
+
+let create_x (n : int) : (int array) =
   let result = Array.make n 0 in
   for i = 0 to n - 1 do
     result.(i) <- i;
   done;
   result
   
-let create_y x =
+let create_y (x : int array) : (int array) =
   let n = Array.length x in
   let result = Array.make n 0 in
   for i = n - 1 downto 0 do
@@ -17,9 +19,9 @@ let create_y x =
   done;
   result
 
-let my_try n = Array.length (create_y (create_x n))
+let my_try (n : int) : int = Array.length (create_y (create_x n))
 
-let rec go m n r =
+let rec go (m : int) (n : int) (r : int) : int =
   if m > 0 then
     go (m - 1) n (my_try n)
   else r

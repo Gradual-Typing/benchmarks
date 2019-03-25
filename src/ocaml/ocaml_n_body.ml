@@ -6,17 +6,17 @@
  * alter as commented below to interact with
  * the grift benchmark suite.
  *)
+(* 3/25/2019 adding type annotations *)
 
-
-let pi = 3.141592653589793
-let solar_mass = 4. *. pi *. pi
-let days_per_year = 365.24
+let pi : float = 3.141592653589793
+let solar_mass : float = 4. *. pi *. pi
+let days_per_year : float = 365.24
 
 type planet = { mutable x : float;  mutable y : float;  mutable z : float;
                 mutable vx: float;  mutable vy: float;  mutable vz: float;
                 mass : float }
 
-let advance bodies dt =
+let advance (bodies : planet array) (dt : float) =
   let n = Array.length bodies - 1 in
   for i = 0 to Array.length bodies - 1 do
     let b = bodies.(i) in
@@ -43,8 +43,8 @@ let advance bodies dt =
   done
 
 
-let energy bodies =
-  let e = ref 0. in
+let energy (bodies : planet array) : float =
+  let e : float ref = ref 0. in
   for i = 0 to Array.length bodies - 1 do
     let b = bodies.(i) in
     e := !e +. 0.5 *. b.mass *. (b.vx *. b.vx +. b.vy *. b.vy +. b.vz *. b.vz);
@@ -58,7 +58,7 @@ let energy bodies =
   !e
 
 
-let offset_momentum bodies =
+let offset_momentum (bodies : planet array) =
   let px = ref 0. and py = ref 0. and pz = ref 0. in
   for i = 0 to Array.length bodies - 1 do
     px := !px +. bodies.(i).vx *. bodies.(i).mass;

@@ -1,12 +1,14 @@
-let swap a i j =
+(* 3/25/2019 adding type annotations *)
+
+let swap (a : int array) (i : int) (j : int) =
   if i <> j then
     let t = a.(i) in
     a.(i) <- a.(j);
     a.(j) <- t
     
-let partition a p r =
+let partition (a : int array) (p : int) (r : int) =
   let i : int ref = ref (p - 1) in
-  let x = a.(r) in
+  let x : int = a.(r) in
   for j = p to r - 1 do
     if a.(j) <= x then
       (i := !i + 1;
@@ -15,7 +17,7 @@ let partition a p r =
   swap a (!i + 1) r;
   !i + 1
   
-let rec sort a p r =
+let rec sort (a : int array) (p : int) (r : int) =
   if p < r then
     let q = partition a p r in
     sort a p (q - 1);

@@ -1,5 +1,6 @@
 (* 9/27/2017 added types to support typed-racket by Andre Kuhlenschmidt *)
 (* 10/1/2017 ported typed-racket benchmark to ocaml Andre Kuhlenschmidt *)
+(* 3/25/2019 adding type annotations *)
 
 (* 
    Objective Caml is a fast modern type-inferring functional programming language 
@@ -8,9 +9,9 @@
    http://www.ocaml.org/
 *)
 
-let inv_sqrt_2x_pi = 0.39894228040143270286
+let inv_sqrt_2x_pi : float = 0.39894228040143270286
 
-let cummulative_normal_distribution inputX = 
+let cummulative_normal_distribution (inputX : float) : float = 
   let sign = inputX < 0.0 in
   let x_input = if sign then inputX *. -1.0 else inputX in
   let exp_values = exp (-0.5 *. x_input *. x_input) in
@@ -29,7 +30,8 @@ let cummulative_normal_distribution inputX =
   let x  = 1.0 -. (x *. n_prime_of_x) in
   if sign then 1.0 -. x else x
 
-let black_scholes spot strike rate volatility time option_type timet =
+let black_scholes (spot : float) (strike : float) (rate : float)
+  (volatility : float) (time : float) (option_type : int) (timet : float) : float =
   let logp = log (spot /. strike) in
   let pow = 0.5 *. (volatility *. volatility) in
   let den = volatility *. (sqrt time) in
@@ -57,22 +59,8 @@ type stock_option =
     mutable divs         : float;
     mutable derivegem_val: float}
 
-(*
-Haven't figured out how to read a single character from stdin
-(define (read-option-type)
-  (let ([c (read-char)])
-    (when (eof-object? c)
-      (error 'blackscholes.rkt "invalid input: expected option type"))
-    (if (fx= (char->integer c) (char->integer #\P))
-        c
-        (if (fx= (char->integer c) (char->integer #\C))
-            c
-            (if (fx= (char->integer c) (char->integer #\space))
-                (read-option-type)
-                (error 'blackscholes.rkt "invalid input: expected option type"))))))*)
-
 let make_option spot_price strike_price rfi_rate divr
-  volatility time option_type divs derivegem_val =
+  volatility time option_type divs derivegem_val : stock_option =
   {spot_price = spot_price;   
    strike_price = strike_price; 
    rfi_rate = rfi_rate;     
@@ -83,7 +71,7 @@ let make_option spot_price strike_price rfi_rate divr
    divs = divs;         
    derivegem_val = derivegem_val}
     
-let read_option () =
+let read_option () : stock_option =
   Scanf.bscanf
     Scanf.Scanning.stdin
     "%f %f %f %f %f %f %c %f %f\n"
@@ -103,17 +91,17 @@ let fake_data =
 
 let run_benchmark () =
   let number_of_options = read_int () in
-  let data = Array.make number_of_options fake_data in
+  let data : stock_option array = Array.make number_of_options fake_data in
   for i = 0 to number_of_options - 1 do
     data.(i) <- read_option ()
   done;
   (* This is really dumb but it is from the original benchmark *)
-  let spots = Array.make number_of_options 0.0 in
-  let strikes = Array.make number_of_options 0.0 in
-  let rates = Array.make number_of_options 0.0 in
-  let volatilities = Array.make number_of_options 0.0 in
-  let otypes = Array.make number_of_options 0 in
-  let otimes = Array.make number_of_options 0.0 in
+  let spots : float array = Array.make number_of_options 0.0 in
+  let strikes : float array = Array.make number_of_options 0.0 in
+  let rates : float array = Array.make number_of_options 0.0 in
+  let volatilities : float array = Array.make number_of_options 0.0 in
+  let otypes : int array = Array.make number_of_options 0 in
+  let otimes : float array = Array.make number_of_options 0.0 in
   for i = 0 to number_of_options - 1 do
     let od = data.(i) in 
     otypes.(i) <- if od.option_type = 'P' then 1 else 0;
@@ -123,7 +111,7 @@ let run_benchmark () =
     volatilities.(i) <- od.volatility;
     otimes.(i) <- od.time;
   done;
-  let prices = Array.make number_of_options 0.0 in
+  let prices : float array = Array.make number_of_options 0.0 in
   for j = 0 to number_of_runs - 1 do
     for i = 0 to number_of_options - 1 do
       prices.(i) <- black_scholes spots.(i) strikes.(i) rates.(i)

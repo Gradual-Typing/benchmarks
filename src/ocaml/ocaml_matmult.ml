@@ -1,5 +1,6 @@
+(* 3/25/2019 adding type annotations *)
 
-let create l1 l2 =
+let create (l1 : int) (l2 : int) : int array =
   let x = Array.make (l1 * l2) 0 in
   for i = 0 to l1-1 do
     for j = 0 to l2-1 do
@@ -8,8 +9,8 @@ let create l1 l2 =
   done;
   x
 
-let mult x x1 x2 y y1 y2 =
-  let r = Array.make (y2 * x1) 0 in
+let mult (x : int array) (x1 : int) (x2 : int) (y : int array) (y1 : int) (y2 : int) : int array =
+  let r : int array = Array.make (y2 * x1) 0 in
   for i = 0 to x1-1 do
     for j = 0 to y2-1 do
       if j < y2 then

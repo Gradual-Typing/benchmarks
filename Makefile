@@ -1,4 +1,5 @@
-IMAGE_NAME=dalmahal90/grift-benchmarks:pldi
+# IMAGE_NAME=dalmahal90/grift-benchmarks:pldi
+IMAGE_NAME=benchmarks
 CONTAINER_NAME=benchmarks_container
 HOST_EXPERIMENT_DIR=/home/$(USER)/experiments
 CONTAINER_EXPERIMENT_DIR=/app/experiments
@@ -30,42 +31,36 @@ run:
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME)
 
 run-test:
-	cp -r ./* $(HOST_EXPERIMENT_DIR)
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test
 
 run-test-coarse:
-	cp -r ./* $(HOST_EXPERIMENT_DIR)
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test_coarse
 
 run-test-fine:
-	cp -r ./* $(HOST_EXPERIMENT_DIR)
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test_fine
 
 run-test-external:
-	cp -r ./* $(HOST_EXPERIMENT_DIR)
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test_external
 
 run-release-fast:
-	cp -r ./* $(HOST_EXPERIMENT_DIR)
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make release-fast
 
 run-release:
-	cp -r ./* $(HOST_EXPERIMENT_DIR)
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \

@@ -37,7 +37,7 @@ WORKDIR /app/Grift
 RUN git checkout port-from-tr
 RUN raco setup grift
 WORKDIR /app
-ENV PATH="/root/.racket/$(Racket_VER)/bin/:$PATH"
+ENV PATH="/root/.racket/${Racket_VER}/bin/:$PATH"
 
 # installing the Dynamizer
 RUN git clone https://github.com/Gradual-Typing/Dynamizer.git \

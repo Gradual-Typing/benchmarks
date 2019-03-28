@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# needed so that anyone can access the files
 umask 000
 
 function main()

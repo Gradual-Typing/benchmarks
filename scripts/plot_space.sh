@@ -1,6 +1,9 @@
 #!/bin/sh
 set -euo pipefail
 
+# needed so that anyone can access the files
+umask 000
+
 # Script to plot figures for the benchmarks with space issues when the input is
 # varied.
 

@@ -1,3 +1,6 @@
+# needed so that anyone can access the files
+umask 000
+
 # $1 - Name of the benchmark
 # $2 - file containing the input to the benchmark
 # $3 - disk aux name

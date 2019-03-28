@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# needed so that anyone can access the files
+umask 000
+
 # runtime.sh and benchmarks.sh should be sourced before calling any of these functions
 
 # arg1: the index of the first configuration

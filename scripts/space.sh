@@ -1,9 +1,11 @@
-#!/home/dalmahal/sys/bin/bash
-# needs bash >= 4.3
+#bin/bash
+
 set -euo pipefail
 
-# Runs the expirement for benchmarks with space issues when the input is varied
+# needed so that anyone can access the files
+umask 000
 
+# Runs the expirement for benchmarks with space issues when the input is varied
 
 function run_config()
 {

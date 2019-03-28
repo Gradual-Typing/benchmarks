@@ -148,7 +148,7 @@ run_experiment()
 	done
     elif [ "$INPUT_TYPE" == "release" ]; then
 	for ((i=0;i<${#BENCHMARKS[@]};++i)); do
-            run_benchmark $baseline_system $static_system $dynamic_system "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL[i]}"  ""
+            run_benchmark $baseline_system $static_system $dynamic_system "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL_COARSE[i]}"  ""
 	done
     else
 	echo "ERROR: INPUT_TYPE: expected test or release but got ${INPUT_TYPE}"

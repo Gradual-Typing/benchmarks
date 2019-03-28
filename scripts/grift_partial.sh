@@ -262,11 +262,19 @@ run_experiment()
 		g+=($RETURN)
 	    done
     elif [ "$INPUT_TYPE" == "release" ]; then
+	if [ "$MODE" = "fine" ]; then
 	    for ((i=0;i<${#BENCHMARKS[@]};++i)); do
 		run_benchmark $baseline_system $static_system $dynamic_system $config1_index $config2_index\
-                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL[i]}" ""
+                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL_FINE[i]}" ""
 		g+=($RETURN)
 	    done
+	elif [ "$MODE" = "coarse" ]; then
+	    for ((i=0;i<${#BENCHMARKS[@]};++i)); do
+		run_benchmark $baseline_system $static_system $dynamic_system $config1_index $config2_index\
+                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL_COARSE[i]}" ""
+		g+=($RETURN)
+	    done
+	fi
     else
 	echo "ERROR: INPUT_TYPE: expected test or release but got ${INPUT_TYPE}"
 	exit 1
@@ -292,7 +300,7 @@ main()
     LOOPS="$1";         shift
     local date="$1";    shift
     CAST_PROFILER="$1"; shift
-    local MODE="$1";    shift
+    MODE="$1";          shift
     BINS_N="$1";        shift
     SAMPLES_N="$1";     shift
     INPUT_TYPE="$1";    shift

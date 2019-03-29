@@ -415,18 +415,24 @@ function plot_two_configs_fine_benchmark()
                 `"set output '${cumulative_performance_fig}';"`
                 `"set border 15 back;"`
                 `"unset key;"`
-		`"round(x) = x - floor(x) < 0.5 ? floor(x) : ceil(x);"`
-		`"round2(x, n) = round(x*10**n)*10.0**(-n);"`
 	        `"max(x,y) = (x > y) ? x : y;"`
                 `"stats '${config2_log_sorted}' using 4 nooutput;"`
-		`"type_based_max_slowdown = round2(STATS_max, 2);"`
+		`"type_based_max_slowdown = ceil(STATS_max);"`
 		`"added = STATS_records*5/100;"`
                 `"set yrange [1:STATS_records+added];"`
-		`"range_max = max(20, type_based_max_slowdown);"`
-                `"set xrange [0:range_max];"`
-                `"set xtics nomirror (1, 2, range_max);"`
                 `"set ytics (1, STATS_records/2, STATS_records);"`
+                `"stats '${config1_log_sorted}' using 4 nooutput;"`
+		`"coercion_max_slowdown = ceil(STATS_max);"`
+		`"range_max = max(max(20, type_based_max_slowdown), coercion_max_slowdown);"`
+                `"set xrange [0:range_max];"`
+                `"set arrow from coercion_max_slowdown,graph(0,0) to coercion_max_slowdown,graph(1,1) nohead dt \".\" lc rgb \"black\" lw 1;"`
+                `"set arrow from type_based_max_slowdown,graph(0,0) to type_based_max_slowdown,graph(1,1) nohead dt \".\" lc rgb \"black\" lw 1;"`
+		`"print \"type_based_max_slowdown=\",type_based_max_slowdown;"`
+		`"print \"coercion_max_slowdown=\",coercion_max_slowdown;"`
+		`"mid_point1 = coercion_max_slowdown > 15 ? (range_max - coercion_max_slowdown < 5 ? range_max : coercion_max_slowdown) : coercion_max_slowdown;"`
+		`"mid_point2 = type_based_max_slowdown > 15 ? (range_max - type_based_max_slowdown < 5 ? range_max : type_based_max_slowdown) : type_based_max_slowdown;"`
 		`"set logscale x;"`
+                `"set xtics nomirror (1, 2, mid_point1, mid_point2, range_max);"`
                 `"set arrow from 1,graph(0,0) to 1,graph(1,1) nohead lc rgb \"black\" lw 2;"`
                 `"set arrow from 2,graph(0,0) to 2,graph(1,1) nohead dt \".\" lc rgb \"black\" lw 1;"`
                 `"set arrow from 3,graph(0,0) to 3,graph(1,1) nohead dt \".\" lc rgb \"black\" lw 1;"`

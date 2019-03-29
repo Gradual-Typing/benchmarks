@@ -62,7 +62,11 @@ function plot_one_config_coarse_benchmark()
     tail -n +2 "$config_log" | sort -k2 -n -t, > "${config_log_sorted}"
 
     # deletes the first line which contains the fully untyped configuration
-    sed -i "1d" "${config_log_sorted}"
+    config_name=$(sed -n 1p "${config1_log_sorted}" |cut -d "," -f1)
+    if [ "$config_name" = "dyn" ]; then
+	sed -i "1d" "${config1_log_sorted}"
+	sed -i "1d" "${config2_log_sorted}"
+    fi
 
     print_aux_name=""
     printname="$(echo "$name" | tr _ "-")${print_aux_name}"

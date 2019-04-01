@@ -23,6 +23,7 @@ function main()
     fi
 
     . lib/runtime.sh
+    . lib/benchmarks.sh
 
     local baseline_system=get_dyn_grift_17_runtime
     # local baseline_system=get_racket_runtime
@@ -51,32 +52,10 @@ function run_double()
     local c2t=$(echo $config_str | sed -n 's/.*,\(.*\),.*/\1/p;q')
     local ct=$(echo $config_str | sed -n 's/.*,.*,\(.*\)/\1/p;q')
 
-    # sieve
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "blackscholes" "in_4K.txt"
-
-    # Blackscholes
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "sieve" "fast.txt"
-
-    # Quicksort
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "quicksort" "in_descend1000.txt"
-
-    # Matrix Multiplication
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "matmult" "400.txt"
-
-    # N Body Simulation
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "n_body" "slow.txt"
-
-    # Fast Fourier Transform
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "fft" "slow.txt"
-
-    # Scheme Array Benchmark
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "array" "slow.txt"
-
-    # Tak
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "tak" "slow.txt"
-
-    # ray
-    run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t" "ray" "empty.txt"
+    for ((i=0;i<${#BENCHMARKS[@]};++i)); do
+	run_two_benchmarks $c1 $c2 "$ct" "$c1t" "$c2t"\
+                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL_FINE[i]}" ""
+    done
 
     echo "finished comparing $c1t to $c2t with $ct, where speedups range from "\
          $MIN_SPEEDUP " to " $MAX_SPEEDUP ", with a mean of" $MEAN_SPEEDUP
@@ -93,28 +72,10 @@ function run_single()
     local config_str=$(grift-configs -c $c $c)
     local ct=$(echo $config_str | sed -n 's/.*,.*,\(.*\)/\1/p;q')
 
-    # Blackscholes
-    run_benchmark $baseline_system $c "$ct" "blackscholes" "in_4K.txt"
-    
-    # Quicksort
-    run_benchmark $baseline_system $c "$ct" "quicksort" "in_descend1000.txt"
-    
-    # Matrix Multiplication
-    run_benchmark $baseline_system $c "$ct" "matmult" "400.txt"
-
-    # N Body Simulation
-    run_benchmark $baseline_system $c "$ct" "n_body" "slow.txt"
-    
-    # Fast Fourier Transform
-    run_benchmark $baseline_system $c "$ct" "fft" "slow.txt"
-    
-    # Scheme Array Benchmark
-    run_benchmark $baseline_system $c "$ct" "array" "slow.txt"
-    
-    # Tak
-    run_benchmark $baseline_system $c "$ct" "tak" "slow.txt"
-
-    run_benchmark $baseline_system $c "$ct" "ray" "empty.txt"
+    for ((i=0;i<${#BENCHMARKS[@]};++i)); do
+	run_benchmark $baseline_system $c "$ct"\
+                      "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_PARTIAL_FINE[i]}" ""
+    done
 
     echo "finished running" $c ", where speedups range from " $MIN_SPEEDUP " to " $MAX_SPEEDUP
 }

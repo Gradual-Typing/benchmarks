@@ -22,6 +22,35 @@ function plot_two_configs_fine()
     local c2t=$(echo $config_str | sed -n 's/.*,\(.*\),.*/\1/p;q')
     local ct=$(echo $config_str | sed -n 's/.*,.*,\(.*\)/\1/p;q')
 
+    PLOT_DIR="${OUT_DIR}/${ct}"
+    RUNTIMES_DIR="${PLOT_DIR}/runtimes"
+    CASTS_DIR="${PLOT_DIR}/casts"
+    RUNTIME_AND_CASTS_COUNT_DIR="${PLOT_DIR}/runtime_and_casts_count"
+    LONGEST_PROXY_CHAINS_DIR="${PLOT_DIR}/longest_proxy_chains"
+    RUNTIME_AND_LONGEST_PROXY_CHAIN_DIR="${PLOT_DIR}/runtime_and_longest_proxy_chain"
+    ALL_DIR="${PLOT_DIR}/all"
+    CUMULATIVE_PERFORMANCE_DIR="${PLOT_DIR}/cum_perf"
+
+    mkdir -p "$RUNTIMES_DIR"
+    mkdir -p "$CASTS_DIR"
+    mkdir -p "$RUNTIME_AND_CASTS_COUNT_DIR"
+    mkdir -p "$LONGEST_PROXY_CHAINS_DIR"
+    mkdir -p "$RUNTIME_AND_LONGEST_PROXY_CHAIN_DIR"
+    mkdir -p "$ALL_DIR"
+    mkdir -p "$CUMULATIVE_PERFORMANCE_DIR"
+
+    local legend_fig="${ALL_DIR}/legend.png"
+
+    gnuplot -e "set datafile separator \",\"; set terminal pngcairo "`
+                `"enhanced color font 'Verdana,20' size 1600,80;"`
+                `"set output '${legend_fig}';"`
+                `"unset border; unset tics;"`
+                `"set key horizontal;"`
+                `"plot [0:1] [0:1] NaN with points pt 9 ps 3 lc rgb '$color1' title '${c1t}',"`
+                `"     NaN with points pt 6 ps 3 lc rgb '$color2' title '${c2t}',"`
+		`"     NaN lw 2 dt 2 lc \"blue\" title 'Static Grift',"`
+		`"     NaN lw 2 lt 1 lc \"red\" title 'Dynamic Grift'"
+
     for benchmark in "${BENCHMARKS[@]}"; do
 	plot_two_configs_fine_benchmark "$benchmark" $c1 $c2 "$c1t" "$c2t" "$ct" $dyn_config
     done
@@ -37,30 +66,13 @@ function plot_two_configs_fine_benchmark()
     local ct="$1";         shift
     local dyn_config="$1"; shift
 
-    local plot_dir="${OUT_DIR}/${ct}"
-    local runtimes_dir="${plot_dir}/runtimes"
-    local casts_dir="${plot_dir}/casts"
-    local runtime_and_casts_count_dir="${plot_dir}/runtime_and_casts_count"
-    local longest_proxy_chains_dir="${plot_dir}/longest_proxy_chains"
-    local runtime_and_longest_proxy_chain_dir="${plot_dir}/runtime_and_longest_proxy_chain"
-    local all_dir="${plot_dir}/all"
-    local cumulative_performance_dir="${plot_dir}/cum_perf"
-
-    mkdir -p "$runtimes_dir"
-    mkdir -p "$casts_dir"
-    mkdir -p "$runtime_and_casts_count_dir"
-    mkdir -p "$longest_proxy_chains_dir"
-    mkdir -p "$runtime_and_longest_proxy_chain_dir"
-    mkdir -p "$all_dir"
-    mkdir -p "$cumulative_performance_dir"
-
-    local runtime_fig="${runtimes_dir}/${name}.png"
-    local casts_count_fig="${casts_dir}/${name}.png"
-    local runtime_and_casts_count_fig="${runtime_and_casts_count_dir}/${name}.png"
-    local longest_proxy_chain_fig="${longest_proxy_chains_dir}/${name}.png"
-    local runtime_and_longest_proxy_chain_fig="${runtime_and_longest_proxy_chain_dir}/${name}.png"
-    local all_fig="${all_dir}/${name}.png"
-    local cumulative_performance_fig="${cumulative_performance_dir}/${name}.png"
+    local runtime_fig="${RUNTIMES_DIR}/${name}.png"
+    local casts_count_fig="${CASTS_DIR}/${name}.png"
+    local runtime_and_casts_count_fig="${RUNTIME_AND_CASTS_COUNT_DIR}/${name}.png"
+    local longest_proxy_chain_fig="${LONGEST_PROXY_CHAINS_DIR}/${name}.png"
+    local runtime_and_longest_proxy_chain_fig="${RUNTIME_AND_LONGEST_PROXY_CHAIN_DIR}/${name}.png"
+    local all_fig="${ALL_DIR}/${name}.png"
+    local cumulative_performance_fig="${CUMULATIVE_PERFORMANCE_DIR}/${name}.png"
 
     local config1_log="${DATA_DIR}/${name}${c1}.log"
     local config2_log="${DATA_DIR}/${name}${c2}.log"
@@ -179,7 +191,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set xtics ('0%%' 0, '25%%' divby, '50%%' divby*2, '75%%' divby*3, '100%%' divby*4) nomirror;"`
 	    `"max(x,y) = (x > y) ? x : y;"`
 	    `"set yrange [0:*];"`
-            `"set label 2 \"Runtime casts count\" at screen 0.02,0.25 rotate by 90;"`
+            `"set label 2 \"Runtime casts count\" at screen 0.01,0.25 rotate by 90;"`
 	    `"set tmargin at screen TOP-DY;"`
 	    `"set bmargin at screen TOP+0.02-2*DY;"`
 	    `"unset key;"`
@@ -193,7 +205,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
-            `"set label 3 \"Runtime in seconds\" at screen 0.02,0.7 rotate by 90;"`
+            `"set label 3 \"Runtime in seconds\" at screen 0.01,0.7 rotate by 90;"`
 	    `"set palette maxcolors 2;"`
 	    `"set palette model RGB defined ( 0 '$color2', 1 '$color2' );"`
 	    `"unset colorbox;"`
@@ -228,7 +240,7 @@ function plot_two_configs_fine_benchmark()
 	    `"max(x,y) = (x > y) ? x : y;"`
 	    `"set yrange [0:*];"`
 	    `"set ytics 1;"`
-            `"set label 2 \"Longest proxy chain\" at screen 0.02,0.25 rotate by 90;"`
+            `"set label 2 \"Longest proxy chain\" at screen 0.01,0.25 rotate by 90;"`
 	    `"set tmargin at screen TOP-DY;"`
 	    `"set bmargin at screen TOP+0.02-2*DY;"`
 	    `"unset key;"`
@@ -243,7 +255,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
-            `"set label 3 \"Runtime in seconds\" at screen 0.02,0.7 rotate by 90;"`
+            `"set label 3 \"Runtime in seconds\" at screen 0.01,0.7 rotate by 90;"`
 	    `"set palette maxcolors 2;"`
 	    `"set palette model RGB defined ( 0 '$color2', 1 '$color2' );"`
 	    `"unset colorbox;"`
@@ -266,13 +278,14 @@ function plot_two_configs_fine_benchmark()
 	    `"set multiplot;"`
             `"set xlabel \"How much of the code is typed\";"`
 	    `"unset ylabel;"`
-            `"set label 1 \"Longest proxy chain\" at screen 0.02,0.15 rotate by 90;"`
+            `"set label 1 \"Longest proxy chain\" at screen 0.01,0.15 rotate by 90;"`
 	    `"set tmargin at screen TOP-2*DY;"`
 	    `"set bmargin at screen TOP-3*DY;"`
 	    `"unset key;"`
 	    `"stats '${config1_log_sorted}' using 19 nooutput;"`
 	    `"set ytics 1;"`
-	    `"set xrange [0:STATS_records+10];"`
+	    `"added = STATS_records*2/100;"`
+	    `"set xrange [0:STATS_records+added];"`
 	    `"divby=STATS_records/4;"`
 	    `"set xtics ('0%%' 0, '25%%' divby, '50%%' divby*2, '75%%' divby*3, '100%%' divby*4) nomirror;"`
 	    `"max(x,y) = (x > y) ? x : y;"`
@@ -286,7 +299,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set format x '';"`
 	    `"set yrange [0:*];"`
 	    `"set ytics auto;"`
-            `"set label 2 \"Runtime casts count\" at screen 0.02,0.45 rotate by 90;"`
+            `"set label 2 \"Runtime casts count\" at screen 0.01,0.45 rotate by 90;"`
 	    `"set tmargin at screen TOP-DY;"`
 	    `"set bmargin at screen TOP+0.02-2*DY;"`
 	    `"unset key;"`
@@ -294,11 +307,11 @@ function plot_two_configs_fine_benchmark()
             `"   pt 9 ps 3 lc rgb '$color1' title '${c1t}',"`
             `"'${config2_log_sorted}' using 0:7 with points"`
             `"   pt 6 ps 3 lc rgb '$color2' title '${c2t}';"`
-            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"unset key;"`
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
-            `"set label 3 \"Runtime in seconds\" at screen 0.02,0.75 rotate by 90;"`
+            `"set label 3 \"Runtime in seconds\" at screen 0.01,0.75 rotate by 90;"`
 	    `"set palette maxcolors 2;"`
 	    `"set palette model RGB defined ( 0 '$color2', 1 '$color2' );"`
 	    `"unset colorbox;"`
@@ -323,12 +336,13 @@ function plot_two_configs_fine_benchmark()
 	    `"unset ylabel;"`
 	    `"unset key;"`
 	    `"stats '${config1_log_sorted}' nooutput;"`
-	    `"set xrange [0:STATS_records+10];"`
+	    `"added = STATS_records*2/100;"`
+	    `"set xrange [0:STATS_records+added];"`
 	    `"divby=STATS_records/4;"`
 	    `"set xtics ('0%%' 0, '25%%' divby, '50%%' divby*2, '75%%' divby*3, '100%%' divby*4) nomirror;"`
 	    `"max(x,y) = (x > y) ? x : y;"`
 	    `"set yrange [0:*];"`
-            `"set label 2 \"Longest proxy chain\" at screen 0.02,0.25 rotate by 90;"`
+            `"set label 2 \"Longest proxy chain\" at screen 0.01,0.25 rotate by 90;"`
 	    `"set tmargin at screen TOP-DY;"`
 	    `"set bmargin at screen TOP+0.02-2*DY;"`
 	    `"unset key;"`
@@ -343,7 +357,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
-            `"set label 3 \"Runtime in seconds\" at screen 0.02,0.7 rotate by 90;"`
+            `"set label 3 \"Runtime in seconds\" at screen 0.01,0.7 rotate by 90;"`
 	    `"set palette maxcolors 2;"`
 	    `"set palette model RGB defined ( 0 '$color2', 1 '$color2' );"`
 	    `"unset colorbox;"`
@@ -366,7 +380,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set multiplot;"`
             `"set xlabel \"How much of the code is typed\";"`
 	    `"unset ylabel;"`
-            `"set label 1 \"Longest proxy chain\" at screen 0.02,0.15 rotate by 90;"`
+            `"set label 1 \"Longest proxy chain\" at screen 0.01,0.15 rotate by 90;"`
 	    `"set tmargin at screen TOP-2*DY;"`
 	    `"set bmargin at screen TOP-3*DY;"`
 	    `"unset key;"`
@@ -385,7 +399,7 @@ function plot_two_configs_fine_benchmark()
 	    `"set format x '';"`
 	    `"set yrange [0:*];"`
 	    `"set ytics auto;"`
-            `"set label 2 \"Runtime casts count\" at screen 0.02,0.45 rotate by 90;"`
+            `"set label 2 \"Runtime casts count\" at screen 0.01,0.45 rotate by 90;"`
 	    `"set tmargin at screen TOP-DY;"`
 	    `"set bmargin at screen TOP+0.02-2*DY;"`
 	    `"unset key;"`
@@ -393,11 +407,11 @@ function plot_two_configs_fine_benchmark()
             `"   pt 9 ps 3 lc rgb '$color1' title '${c1t}',"`
             `"'${config2_log_sorted}' using 0:7 with points"`
             `"   pt 6 ps 3 lc rgb '$color2' title '${c2t}';"`
-            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"unset key;"`
 	    `"set tmargin at screen TOP;"`
 	    `"set bmargin at screen TOP+0.02-DY;"`
             `"set title \"${printname}\";"`
-            `"set label 3 \"Runtime in seconds\" at screen 0.02,0.75 rotate by 90;"`
+            `"set label 3 \"Runtime in seconds\" at screen 0.01,0.75 rotate by 90;"`
 	    `"set palette maxcolors 2;"`
 	    `"set palette model RGB defined ( 0 '$color2', 1 '$color2' );"`
 	    `"unset colorbox;"`

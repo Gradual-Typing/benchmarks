@@ -47,7 +47,7 @@ function main()
 	exit 1
     fi
 
-    local legend_fig="${COARSE_PLOT_DIR}/legend.png"
+    local legend_fig="${COARSE_CUMULATIVE_PERFORMANCE_DIR}/legend.png"
 
     for benchmark in "${BENCHMARKS[@]}"; do
 	plot_two_configs_and_racket_coarse_benchmark "$benchmark" $c1 $c2 "$c1t" "$c2t" $dyn_config
@@ -71,7 +71,7 @@ function main()
 	    "fft_row.png" \
 	    "matmult_row.png" \
 	    "$legend_fig" \
-	    "${ROOT_DIR}/Fig7.png"
+	    "${ROOT_DIR}/Fig8.png"
 
     rm "quicksort_row.png" \
        "sieve_row.png" \
@@ -91,7 +91,9 @@ function main()
 	    "${ALL_DIR}/fft.png" \
 	    row2.png
 
-    convert -append row1.png row2.png "${ROOT_DIR}/Fig6.png"
+    legend_fig="${ALL_DIR}/legend.png"
+    
+    convert -append row1.png row2.png "$legend_fig" "${ROOT_DIR}/Fig7.png"
 
     rm row1.png row2.png
 
@@ -103,7 +105,7 @@ function main()
     convert -append \
 	    "${EXTERNAL_OUT_DIR}/${config_str}_static.png" \
 	    "${EXTERNAL_OUT_DIR}/${config_str}_dynamic.png" \
-	    "${ROOT_DIR}/Fig8.png"
+	    "${ROOT_DIR}/Fig9.png"
 }
 
 main "$@"

@@ -40,19 +40,19 @@ run-test-coarse:
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
-		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test_coarse
+		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test-coarse
 
 run-test-fine:
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
-		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test_fine
+		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test-fine
 
 run-test-external:
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
-		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test_external
+		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test-external
 
 run-release-fast:
 	docker run --userns=host \
@@ -66,7 +66,7 @@ run-release:
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make release
 
-setup_dir:
+setup-dir:
 	@ mkdir -p $(HOST_EXPERIMENT_DIR)
 	cp -r ./* $(HOST_EXPERIMENT_DIR)
 
@@ -79,28 +79,28 @@ attach:
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) /bin/bash
 
-debug: build typed_racket_benchmarks/.git setup_dir attach
+debug: build typed_racket_benchmarks/.git setup-dir attach
 
-debug_bench: build-unset-arg typed_racket_benchmarks/.git setup_dir attach
+debug-bench: build-unset-arg typed_racket_benchmarks/.git setup-dir attach
 
-debug_nocache: build-no-cache typed_racket_benchmarks/.git setup_dir attach
+debug-nocache: build-no-cache typed_racket_benchmarks/.git setup-dir attach
 
-test: typed_racket_benchmarks/.git setup_dir run-test rm_container
-	cp ~/experiments/Fig* ~/Desktop/
+test: typed_racket_benchmarks/.git setup-dir run-test rm-container
 
-test-coarse: typed_racket_benchmarks/.git setup_dir run-test-coarse rm_container
+test-coarse: typed_racket_benchmarks/.git setup-dir run-test-coarse rm-container
 
-test-fine: typed_racket_benchmarks/.git setup_dir run-test-fine rm_container
+test-fine: typed_racket_benchmarks/.git setup-dir run-test-fine rm-container
 
-test-external: typed_racket_benchmarks/.git setup_dir run-test-external rm_container
+test-external: typed_racket_benchmarks/.git setup-dir run-test-external rm-container
 
-release-fast: typed_racket_benchmarks/.git setup_dir run-release-fast rm_container
-	cp ~/experiments/Fig* ~/Desktop/
+release-fast: typed_racket_benchmarks/.git setup-dir run-release-fast rm-container
 
-release: typed_racket_benchmarks/.git setup_dir run-release rm_container
-	cp ~/experiments/Fig* ~/Desktop/
+release: typed_racket_benchmarks/.git setup-dir run-release rm-container
 
-rm_container:
+copy-figures:
+	cp $(HOST_EXPERIMENT_DIR)/Fig* ~/Desktop/
+
+rm-container:
 	docker rm $(CONTAINER_NAME)
 
 docker-clean:

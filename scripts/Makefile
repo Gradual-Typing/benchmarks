@@ -1,7 +1,7 @@
 INPUT_TYPE ?=release
 BIN_SAMPLES ?= -1
 NUM_BINS ?= 30
-TIMING_SAMPLES ?= 10
+TIMING_SAMPLES ?= 5
 ROOT_DIR ?=/app/experiments
 TEST_DIR=test
 BENCHMARK_DIR ?=fresh
@@ -11,15 +11,15 @@ DYNAMIC_GRIFT_CONFIG ?=17
 
 .PHONY: external fine coarse release plot clean test-clean outputs
 
-release: coarse plot_coarse fine plot_fine external create_figs
+release: coarse plot-coarse fine plot-fine external create-figs
 
-create_figs:
+create-figs:
 	./paper_figs.sh $(ROOT_DIR) $(DYNAMIC_GRIFT_CONFIG) $(CONFIGS)
 
-plot_coarse:
+plot-coarse:
 	./plot_partial.sh $(ROOT_DIR) coarse $(DYNAMIC_GRIFT_CONFIG) $(CONFIGS)
 
-plot_fine:
+plot-fine:
 	./plot_partial.sh $(ROOT_DIR) fine $(DYNAMIC_GRIFT_CONFIG) $(CONFIGS)
 
 external:
@@ -34,22 +34,22 @@ coarse:
 	./grift_partial.sh $(ROOT_DIR) $(TIMING_SAMPLES) $(BENCHMARK_DIR) true coarse \
 		$(NUM_BINS) $(BIN_SAMPLES) $(INPUT_TYPE) $(CONFIGS)
 
-test_coarse:
+test-coarse:
 	INPUT_TYPE=test TIMING_SAMPLES=1 BIN_SAMPLES=1 NUM_BINS=2 \
 	BENCHMARK_DIR=$(TEST_DIR) ROOT_DIR=".." \
-		$(MAKE) coarse plot_coarse
+		$(MAKE) coarse plot-coarse
 
-test_fine:
+test-fine:
 	INPUT_TYPE=test TIMING_SAMPLES=1 BIN_SAMPLES=1 NUM_BINS=2 \
 	BENCHMARK_DIR=$(TEST_DIR) ROOT_DIR=".." \
-		$(MAKE) fine plot_fine
+		$(MAKE) fine plot-fine
 
-test_external:
+test-external:
 	INPUT_TYPE=test TIMING_SAMPLES=1 BIN_SAMPLES=1 NUM_BINS=2 \
 	BENCHMARK_DIR=$(TEST_DIR) ROOT_DIR=".." \
 		$(MAKE) external
 
-test: test_coarse test_fine test_external create_figs
+test: test-coarse test-fine test-external create-figs
 
 release-fast:
 	INPUT_TYPE=test TIMING_SAMPLES=1 $(MAKE) release

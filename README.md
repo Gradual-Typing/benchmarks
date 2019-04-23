@@ -1,17 +1,21 @@
-Collection of benchmarks for gradually typed languages
+Collection of benchmarks for gradually typed languages.
 
 ## Quick Start Guide
 
-To get started, you'll need to install [docker](https://docs.docker.com/install/).
+To get started
+
+0. install [docker](https://docs.docker.com/install/).
 
 1. clone
 
 		$ git clone https://github.com/Gradual-Typing/benchmarks.git
 		$ cd benchmarks
+		$ git checkout pldi19
 
 2. run the full benchmark suite:
 
-		$ make build; make release
+		$ docker pull dalmahal90/grift-benchmarks:pldi19
+		$ make release
 
 ## Getting Started
 
@@ -47,7 +51,7 @@ To get started, you'll need to install [docker](https://docs.docker.com/install/
   than 10 hours.
 
 - `make release`: is similar to the `release-fast` recipe but with each
-  configuration run 10 times instead of 1. This experiment is expected to take a
+  configuration run 5 times instead of 1. This experiment is expected to take a
   few days to finish and needs 10-20GB.
 
 - `make rm-container`: deletes the container.

@@ -1,3 +1,5 @@
+. "${LIB_DIR}/configurations.sh"
+
 # needed so that anyone can access the files
 umask 000
 
@@ -452,6 +454,7 @@ avg()
             exit 1
         else
             local pt_out="$(racket ${LIB_DIR}/parse-time.rkt \
+	    	  		   --floating-point-equal-threshold "$FLOATING_POINT_EQUAL_THRESHOLD" \
                                    --lang ${lang} \
                                    --in ${tmp_out} \
                                    --expect ${output_file})"

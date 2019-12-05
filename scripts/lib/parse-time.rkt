@@ -8,6 +8,7 @@
 
 
 (define racket-time-rx #px"cpu time: \\d+ real time: (\\d+) gc time: \\d+")
+(define racket-return-val-rx #px"(.*?)cpu time: \\d+ real time: \\d+ gc time: \\d+")
 
 (define (racket-time->seconds time)
   (define n (string->number time))
@@ -16,8 +17,10 @@
   (/ (exact->inexact n) 1000))
 
 (define grift-time-rx #px"time \\(sec\\): (\\d+\\.\\d+)\n")
+(define grift-return-val-rx #px"(.*?)time \\(sec\\): \\d+\\.\\d+\n")
 
 (define ocaml-time-rx grift-time-rx)
+(define ocaml-return-val-rx grift-return-val-rx)
 
 (define chez-time-rx
   (pregexp 
@@ -30,12 +33,31 @@
 eof
    ))
 
+(define chez-return-val-rx
+  (pregexp 
+   #<<eof
+(.*?)\(time .+\)
+\s+\w+ collections?
+\s+\d+\.\d+s elapsed cpu time.*
+\s+\d+\.\d+s elapsed real time.*
+\s+\d+ bytes allocated.*
+eof
+   ))
 
 (define gambit-time-rx 
   (pregexp
    #<<eos
 \(time .+\)
 \s+(\d+\.\d+) secs real time
+\s+\d+\.\d+ secs cpu time
+eos
+   ))
+
+(define gambit-return-val-rx 
+  (pregexp
+   #<<eos
+(.*?)\(time .+\)
+\s+\d+\.\d+ secs real time
 \s+\d+\.\d+ secs cpu time
 eos
    ))
@@ -47,10 +69,22 @@ eos
            "expected exact integer: ~a" time))
   (/ (exact->inexact n) 1000))
 
-(define ((parse-time time-rx time->seconds) result-str [expect-str ""])
-  (unless (string-contains? result-str expect-str)
-    (error 'parse-time "expected=\n~a\ngot=\n~a\n"
-           expect-str result-str))
+(define floating-point-equal-threshold (make-parameter 0.0000000001))
+
+(define (floating-point-equal? x y)
+  (< (abs (- x y)) (floating-point-equal-threshold)))
+
+(define ((parse-time return-val-rx time-rx time->seconds) result-str [expect-str ""])
+  (define output-value (cadr (regexp-match return-val-rx result-str)))
+  (define (check-correctness x y)
+    (define num-x (string->number x))
+    (define num-y (string->number y))
+    (cond
+      [(and (and num-x num-y) (floating-point-equal? num-x num-y)) (void)]
+      [(string=? x y) (void)]
+      [else (error 'parse-time "expected=\n~a\ngot=\n~a\n"
+                   expect-str output-value)]))
+  (for-each check-correctness (string-split expect-str) (string-split output-value))
   (match result-str
     [(regexp time-rx (list _ time)) (time->seconds time)]
     [other
@@ -66,19 +100,19 @@ eos
       
 
 (define parse-racket-time
-  (parse-time racket-time-rx exact-millisecond-str-time->seconds))
+  (parse-time racket-return-val-rx racket-time-rx exact-millisecond-str-time->seconds))
 (define strip-racket-time (strip-time racket-time-rx))
 
-(define parse-gambit-time (parse-time gambit-time-rx string->number))
+(define parse-gambit-time (parse-time gambit-return-val-rx gambit-time-rx string->number))
 (define strip-gambit-time (strip-time gambit-time-rx))
 
-(define parse-chez-time (parse-time chez-time-rx string->number))
+(define parse-chez-time (parse-time chez-return-val-rx chez-time-rx string->number))
 (define strip-chez-time (strip-time chez-time-rx))
 
-(define parse-grift-time (parse-time grift-time-rx string->number))
+(define parse-grift-time (parse-time grift-return-val-rx grift-time-rx string->number))
 (define strip-grift-time (strip-time grift-time-rx))
 
-(define parse-ocaml-time (parse-time ocaml-time-rx string->number))
+(define parse-ocaml-time (parse-time ocaml-return-val-rx ocaml-time-rx string->number))
 (define strip-ocaml-time (strip-time ocaml-time-rx))
 
 (module+ main
@@ -115,6 +149,9 @@ eos
     (match-define (cons parse strip) (hash-ref lang-hash lang err))
     (lang-parse-time parse)
     (lang-strip-time strip)]
+   ["--floating-point-equal-threshold" threshold
+    "threshold used when comparing two floating-point numbers for equality"
+    (floating-point-equal-threshold (string->number threshold))]
    [("--strip")
     "remove language specific timing info from input"
     (main strip-time-program)]

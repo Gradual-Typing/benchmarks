@@ -209,6 +209,7 @@ main()
     LOOPS="$1";      shift
     ROOT_DIR="$1";   shift
     local date="$1"; shift
+    OVERWRITE="$1";  shift
     CONFIGS="$@"
 
     declare -r EXTERNAL_DIR="${ROOT_DIR}/results/grift/external"
@@ -234,6 +235,11 @@ main()
     declare -r OUTPUT_DIR="$ROOT_DIR/outputs"
     declare -r PARAMS_LOG="$EXP_DIR/params.txt"
     declare -r LIB_DIR="$ROOT_DIR/scripts/lib"
+
+    if [ "$OVERWRITE" = true ]; then
+	rm -rf "$EXP_DIR"
+	echo "$EXP_DIR has been deleted."
+    fi
 
     # Check to see if all is right in the world
     if [ ! -d $ROOT_DIR ]; then

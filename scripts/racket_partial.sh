@@ -167,16 +167,13 @@ main()
     LOOPS="$1";      shift
     local date="$1"; shift
     INPUT_TYPE="$1"; shift
+    OVERWRITE="$1";  shift
 
     declare -r LB_DIR="${ROOT_DIR}/results/typed_racket/partial/coarse"
     if [ "$date" == "fresh" ]; then
         declare -r DATE=`date +%Y_%m_%d_%H_%M_%S`
-        mkdir -p "$LB_DIR/$DATE"
     elif [ "$date" == "test" ]; then
         declare -r DATE="test"
-        if [ ! -d "$LB_DIR/$DATE" ]; then
-            mkdir -p "$LB_DIR/$DATE"
-        fi
     else
         declare -r DATE="$date"
         if [ ! -d "$LB_DIR/$DATE" ]; then
@@ -196,12 +193,17 @@ main()
     declare -r LIB_DIR="${ROOT_DIR}/scripts/lib"
     declare -r PARAMS_LOG="$EXP_DIR/params.txt"
 
+    if [ "$OVERWRITE" = true ]; then
+	rm -rf "$EXP_DIR"
+	echo "$EXP_DIR has been deleted."
+    fi
+
     # Check to see if all is right in the world
     if [ ! -d $ROOT_DIR ]; then
         echo "directory not found: ${ROOT_DIR}" 1>&2
         exit 1
-    elif [ ! -d $EXP_DIR ]; then
-        echo "Directory not found: ${EXP_DIR}"
+    elif [ ! -d $LB_DIR ]; then
+        echo "Directory not found: ${LB_DIR}"
         exit 1
     elif [ ! -d $SRC_DIR ]; then
         echo "directory not found: ${SRC_DIR}" 1>&2

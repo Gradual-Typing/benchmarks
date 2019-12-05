@@ -35,6 +35,12 @@ run-test:
 		--ulimit stack=-1 \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test
 
+run-test-overwrite:
+	docker run --userns=host \
+		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
+		--ulimit stack=-1 \
+		--name=$(CONTAINER_NAME) $(IMAGE_NAME) time make test-overwrite
+
 run-test-coarse:
 	docker run --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
@@ -85,6 +91,8 @@ debug-bench: build-unset-arg typed_racket_benchmarks/.git setup-dir attach
 debug-nocache: build-no-cache typed_racket_benchmarks/.git setup-dir attach
 
 test: typed_racket_benchmarks/.git setup-dir run-test rm-container
+
+test-overwrite: typed_racket_benchmarks/.git setup-dir run-test-overwrite rm-container
 
 test-coarse: typed_racket_benchmarks/.git setup-dir run-test-coarse rm-container
 

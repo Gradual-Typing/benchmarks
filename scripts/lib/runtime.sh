@@ -81,9 +81,9 @@ get_typed_racket_config_runtime()
 # $RETURN - the runtime for the racket benchmark
 get_ocaml_runtime()
 {
-    local benchmark="$1";      shift
-    local input="$1"; shift
-    local disk_aux_name="$1";  shift
+    local benchmark="$1";     shift
+    local input="$1";         shift
+    local disk_aux_name="$1"; shift
     
     local benchmark_path="${TMP_DIR}/ocaml/${benchmark}"
     local runtimes_file="${benchmark_path}${disk_aux_name}.runtimes"
@@ -91,12 +91,12 @@ get_ocaml_runtime()
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
-	make -C "$(dirname $benchmark_path)"
-	avg "${benchmark_path}"\
+        make -C "$(dirname $benchmark_path)"
+        avg "${benchmark_path}"\
             "${INPUT_DIR}/${benchmark}/${input}"\
             "ocaml" "${OUTPUT_DIR}/ocaml/${benchmark}/${input}"\
             "$runtimes_file"
-	echo "$RETURN" > "$cache_file"
+        echo "$RETURN" > "$cache_file"
     fi
 }
 
@@ -106,9 +106,9 @@ get_ocaml_runtime()
 # $RETURN - the runtime for the racket benchmark
 get_chezscheme_runtime()
 {
-    local benchmark="$1";      shift
-    local benchmark_args="$1"; shift
-    local disk_aux_name="$1";  shift
+    local benchmark="$1";     shift
+    local input="$1";         shift
+    local disk_aux_name="$1"; shift
     
     local benchmark_path="${TMP_DIR}/chezscheme/${benchmark}"
     local runtimes_file="${benchmark_path}${disk_aux_name}.runtimes"
@@ -176,7 +176,7 @@ get_grift_runtimes()
     if [ -f $cache_file ]; then
         readarray RETURN < "$cache_file"
     else
-	grift-bench "${benchmark_path}.grift"
+        grift-bench "${benchmark_path}.grift"
         local configs=($(grift-configs -i))
         for i in ${configs[@]}; do
             avg "${benchmark_path}.o${i}" "${input}" "$runtimes_file"
@@ -254,7 +254,7 @@ get_gambit_runtime()
         RETURN=$(cat "$cache_file")
     else
         gambitc -prelude "(declare (standard-bindings) (block))"\
-		-exe -cc-options -O3 "${benchmark_path}.scm"
+                -exe -cc-options -O3 "${benchmark_path}.scm"
         avg "${benchmark_path}" "${INPUT_DIR}/${benchmark}/${input}"\
             "gambit" "${OUTPUT_DIR}/gambit/${benchmark}/${input}" \
             "$runtimes_file"
@@ -284,7 +284,7 @@ get_grift_slowdowns()
         get_grift_runtimes "$benchmark_path" "$benchmark_args" "$disk_aux_name"
         st=${RETURN[@]}
         for st in ${st[@]}; do
-            sr=$(echo "${st}/${baseline}" | bc -l | awk -v p="$PRECISION" '{printf "%.*f\n",p, $0}')
+            local sr=$(echo "${st}/${baseline}" | bc -l | awk -v p="$PRECISION" '{printf "%.*f\n",p, $0}')
             RETURN=$(echo "$sr" | awk '{printf "%.2f\n",$0}')
             echo "$RETURN" >> "$cache_file"
         done
@@ -315,9 +315,10 @@ get_grift_slowdown()
         $baseline_system "$benchmark" "${input}" "$disk_aux_name"
         local baseline="$RETURN" st sr;
         get_grift_runtime "$benchmark_path" "${input}"\
-			  "$disk_aux_name" $config_index
+                          "$disk_aux_name" $config_index
         local st="$RETURN";
-        RETURN=$(echo "${st} ${baseline}" | awk '{printf "%.2f", $1 \ $2}')
+        local sr=$(echo "${st}/${baseline}" | bc -l | awk -v p="$PRECISION" '{printf "%.*f\n",p, $0}')
+        RETURN=$(echo "$sr" | awk '{printf "%.2f\n",$0}')
         echo "$RETURN" >> "$cache_file"
     fi
 }
@@ -338,7 +339,7 @@ get_grift_speedup()
 
     # Is this cache_file supose to be called .slowdown_ ?
     local name="${benchmark_path}${disk_aux_name}${config_index}"
-    local cache_file="${name}.slowdown_${baseline_system}"
+    local cache_file="${name}.speedup_${baseline_system}"
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
@@ -398,7 +399,7 @@ get_speedup()
     local disk_aux_name="$1";   shift
     
     local name="${TMP_DIR}/${system}/${benchmark}${disk_aux_name}"
-    local cache_file="${name}.slowdown_${baseline_system}"
+    local cache_file="${name}.speedup_${baseline_system}"
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
@@ -454,7 +455,7 @@ avg()
             exit 1
         else
             local pt_out="$(racket ${LIB_DIR}/parse-time.rkt \
-	    	  		   --floating-point-equal-threshold "$FLOATING_POINT_EQUAL_THRESHOLD" \
+                                   --floating-point-equal-threshold "$FLOATING_POINT_EQUAL_THRESHOLD" \
                                    --lang ${lang} \
                                    --in ${tmp_out} \
                                    --expect ${output_file})"

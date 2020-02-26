@@ -5,7 +5,7 @@ RUN pacman --quiet --noconfirm -S base-devel git sudo time wget nano inetutils
 
 WORKDIR /app
 
-ENV Racket_VER=7.2
+ENV Racket_VER=7.6
 RUN wget https://mirror.racket-lang.org/installers/${Racket_VER}/racket-${Racket_VER}-x86_64-linux.sh \
     && chmod a+x racket-${Racket_VER}-x86_64-linux.sh \
     && ./racket-${Racket_VER}-x86_64-linux.sh --in-place --dest /root/racket
@@ -29,15 +29,6 @@ RUN pacman --quiet --noconfirm -S clang
 
 # Invalidate Cache so that a fresh Grift is Installed.
 # ARG CACHE_DATE=not_a_date # Commented out for PLDI Artifact
-
-# installing Grift
-RUN raco pkg install --no-setup \
-    --clone Grift https://github.com/Gradual-Typing/Grift.git 
-WORKDIR /app/Grift
-RUN git checkout port-from-tr
-RUN raco setup grift
-WORKDIR /app
-ENV PATH="/root/.racket/${Racket_VER}/bin/:$PATH"
 
 # installing the Dynamizer
 RUN git clone https://github.com/Gradual-Typing/Dynamizer.git \
@@ -66,6 +57,11 @@ RUN pacman --quiet --noconfirm -S cairo fribidi python libcerf harfbuzz libthai 
     && ldconfig \
     && ./configure --disable-wxwidgets --with-qt=no --with-x --with-readline=gnu \
     && make -j 8 && make install
+
+# installing Grift
+RUN raco pkg install grift
+WORKDIR /app
+ENV PATH="/root/.racket/${Racket_VER}/bin/:$PATH"
 
 ARG EXPR_DIR=not_a_path
 

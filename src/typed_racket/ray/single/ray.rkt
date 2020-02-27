@@ -185,24 +185,27 @@
                    (fl- (point-z c) (point-z pt)))))
 
   (begin
-    (let ([counter : (Boxof Integer) (box 29)])
-      (begin
-        (defsphere 32 0.0 -300.0 -1200.0 200.0 0.8)
-        (defsphere 31 -80.0 -150.0 -1200.0 200.0 0.7)
-        (defsphere 30 70.0 -100.0 -1200.0 200.0 0.9)
-        (do : Void
-          ((x : Integer -2 (+ x 1)))
-          ((> x 2))
-          (do : Void ((z : Integer 2 (+ z 1)))
-              ((> z 7))
-              (defsphere
-                (unbox counter)
-                (fl* (->fl x) 200.0)
-                300.0
-                (fl* (->fl z) -400.0)
-                40.0
-                0.75)
-              (set-box! counter (- (unbox counter) 1))))))
-    (tracer 1)))
+    (let ([res (read)])
+      (unless (exact-integer? res)
+        (error 'invalid-input "~a" res))
+      (let ([counter : (Boxof Integer) (box 29)])
+        (begin
+          (defsphere 32 0.0 -300.0 -1200.0 200.0 0.8)
+          (defsphere 31 -80.0 -150.0 -1200.0 200.0 0.7)
+          (defsphere 30 70.0 -100.0 -1200.0 200.0 0.9)
+          (do : Void
+            ((x : Integer -2 (+ x 1)))
+            ((> x 2))
+            (do : Void ((z : Integer 2 (+ z 1)))
+                ((> z 7))
+                (defsphere
+                  (unbox counter)
+                  (fl* (->fl x) 200.0)
+                  300.0
+                  (fl* (->fl z) -400.0)
+                  40.0
+                  0.75)
+                (set-box! counter (- (unbox counter) 1))))))
+      (tracer res))))
 
 (time (main))

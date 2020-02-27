@@ -83,7 +83,7 @@
                        (fl* (point-z ray) (point-z n)))))))
 
   (define (main) : Unit
-    (begin
+    (let ([res : Int (read-int)])
       (defsphere 32 #i0.0 #i-300.0 #i-1200.0 #i200.0 #i0.8)
       (defsphere 31 #i-80.0 #i-150.0 #i-1200.0 #i200.0 #i0.7)
       (defsphere 30 #i70.0 #i-100.0 #i-1200.0 #i200.0 #i0.9)
@@ -99,6 +99,6 @@
                             #i40.0
                             #i0.75)
                           (box-set! counter (- (unbox counter) 1))))))
-      (tracer 1)))
+      (tracer res)))
 
   (time (main)))

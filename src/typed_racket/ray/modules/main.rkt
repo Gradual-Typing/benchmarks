@@ -115,8 +115,10 @@
 
 (: main : -> Void)
 (define (main)
-  (begin
+  (let ([res (read)])
     (let ([counter : (Boxof Integer) (box 29)])
+      (unless (exact-nonnegative-integer? res)
+        (error 'invalid-input "~a" res))
       (begin
         (defsphere 32 0.0 -300.0 -1200.0 200.0 0.8)
         (defsphere 31 -80.0 -150.0 -1200.0 200.0 0.7)
@@ -134,6 +136,6 @@
                 40.0
                 0.75)
               (set-box! counter (- (unbox counter) 1))))))
-    (tracer 1)))
+    (tracer res)))
 
 (time (main))

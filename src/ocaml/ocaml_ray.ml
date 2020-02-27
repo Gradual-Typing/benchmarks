@@ -105,20 +105,21 @@ let defsphere (i : int) (x : float) (y : float) (z : float) (r : float) (c : flo
   
 let run_benchmark () =
   let counter : int ref = ref 29 in
-  defsphere 32    0.0  (-300.0) (-1200.0) 200.0 0.8;
-  defsphere 31 (-80.0) (-150.0) (-1200.0) 200.0 0.7;
-  defsphere 30   70.0  (-100.0) (-1200.0) 200.0 0.9;
-  for x = -2 to 2 do
-    for z = 2 to 7 do
-      defsphere !counter
-                ((float_of_int x)*. 200.0)
-                300.0
-                ((float_of_int z)*. -400.0)
-                40.0
-                0.75;
-      counter := !counter - 1
-    done
-  done;
-  tracer 1
+    let res = read_int () in
+      defsphere 32    0.0  (-300.0) (-1200.0) 200.0 0.8;
+      defsphere 31 (-80.0) (-150.0) (-1200.0) 200.0 0.7;
+      defsphere 30   70.0  (-100.0) (-1200.0) 200.0 0.9;
+      for x = -2 to 2 do
+        for z = 2 to 7 do
+          defsphere !counter
+                    ((float_of_int x)*. 200.0)
+                    300.0
+                    ((float_of_int z)*. -400.0)
+                    40.0
+                    0.75;
+          counter := !counter - 1
+        done
+      done;
+      tracer res
 
 let () = Time.time run_benchmark ()

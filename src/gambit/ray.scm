@@ -64,7 +64,7 @@
           [int (vector-ref x 1)])
       (if s
           (fl* (lambert s int ray)
-		 (sphere-color s))
+                 (sphere-color s))
           0.0))))
 
 (define (loop pt ray index lst-len lst surface hit dist)
@@ -140,7 +140,8 @@
                  (fl- (point-z c) (point-z pt)))))
 
 (define (run-benchmark)
-  (let ([counter (box 29)])
+  (let ([counter (box 29)]
+        [res (read)])
     (defsphere 32 0.0 -300.0 -1200.0 200.0 0.8)
     (defsphere 31 -80.0 -150.0 -1200.0 200.0 0.7)
     (defsphere 30 70.0 -100.0 -1200.0 200.0 0.9)
@@ -156,6 +157,6 @@
           40.0
           0.75)
         (set-box! counter (- (unbox counter) 1))))
-    (tracer 1)))
+    (tracer res)))
 
 (time (run-benchmark) (current-output-port))

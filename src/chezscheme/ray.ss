@@ -142,8 +142,9 @@
                  (fl- (point-z c) (point-z pt)))))
 
 (define (run-benchmark)
-  (let ([counter (box 29)])
-    (defsphere 32 0.0 -300.0 -1200.0 200.0 0.8)
+  (let ([res (read)])
+    (let ([counter (box 29)])
+      (defsphere 32 0.0 -300.0 -1200.0 200.0 0.8)
       (defsphere 31 -80.0 -150.0 -1200.0 200.0 0.7)
       (defsphere 30 70.0 -100.0 -1200.0 200.0 0.9)
       (do ((x -2 (fx+ x 1)))
@@ -158,6 +159,6 @@
             40.0
             0.75)
           (set-box! counter (- (unbox counter) 1)))))
-  (tracer 1))
+    (tracer res)))
 
 (time (run-benchmark))

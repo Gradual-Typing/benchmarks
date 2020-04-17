@@ -306,20 +306,20 @@ main()
     INPUT_TYPE="$1";    shift
     OVERWRITE="$1";     shift
 
-    declare -r LB_DIR="${ROOT_DIR}/results/grift/partial/${MODE}"
+    declare -r RESULTS_DIR="${ROOT_DIR}/results/grift/partial/${MODE}"
     if [ "$date" == "fresh" ]; then
         declare -r DATE=`date +%Y_%m_%d_%H_%M_%S`
     elif [ "$date" == "test" ]; then
         declare -r DATE="test"
     else
         declare -r DATE="$date"
-        if [ ! -d "$LB_DIR/$DATE" ]; then
-            echo "$LB_DIR/$DATE" "Directory not found"
+        if [ ! -d "$RESULTS_DIR/$DATE" ]; then
+            echo "$RESULTS_DIR/$DATE" "Directory not found"
             exit 1
 	fi
     fi
 
-    declare -r EXP_DIR="$LB_DIR/$DATE"
+    declare -r EXP_DIR="$RESULTS_DIR/$DATE"
     declare -r DATA_DIR="$EXP_DIR/data"
     declare -r OUT_DIR="$EXP_DIR/output"
     declare -r GMEANS="${OUT_DIR}/geometric-means.csv"
@@ -338,9 +338,6 @@ main()
     # Check to see if all is right in the world
     if [ ! -d $ROOT_DIR ]; then
         echo "directory not found: ${ROOT_DIR}" 1>&2
-        exit 1
-    elif [ ! -d $LB_DIR ]; then
-        echo "Directory not found: ${LB_DIR}"
         exit 1
     elif [ ! -d $SRC_DIR ]; then
         echo "directory not found: ${SRC_DIR}" 1>&2

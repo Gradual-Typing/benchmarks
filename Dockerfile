@@ -64,7 +64,7 @@ ARG CACHE_DATE=not_a_date
 RUN raco pkg install --no-setup \
     --clone Grift https://github.com/deyaaeldeen/Grift.git 
 WORKDIR /app/Grift
-RUN git checkout data-fun-config
+RUN git checkout bench-keep-c
 RUN raco setup grift
 WORKDIR /app
 ENV PATH="/root/.racket/${Racket_VER}/bin/:$PATH"

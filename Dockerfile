@@ -58,13 +58,17 @@ RUN pacman --quiet --noconfirm -S cairo fribidi python libcerf harfbuzz libthai 
     && ./configure --disable-wxwidgets --with-qt=no --with-x --with-readline=gnu \
     && make -j 8 && make install
 
+ARG CACHE_DATE=not_a_date
+
 # installing Grift
-RUN raco pkg install grift
+RUN raco pkg install --no-setup \
+    --clone Grift https://github.com/deyaaeldeen/Grift.git 
+WORKDIR /app/Grift
+RUN git checkout data-fun-config
+RUN raco setup grift
 WORKDIR /app
 ENV PATH="/root/.racket/${Racket_VER}/bin/:$PATH"
-
 ARG EXPR_DIR=not_a_path
-
 WORKDIR $EXPR_DIR/scripts
 
 CMD make test

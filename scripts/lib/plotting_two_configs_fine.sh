@@ -140,7 +140,7 @@ function plot_two_configs_fine_benchmark()
             `"set terminal pngcairo size 1280,960"`
             `"   enhanced color font 'Verdana,26' ;"`
             `"set output '${runtime_fig}';"`
-            `"set key opaque top right box vertical width 1 height 1 maxcols 1 spacing 1 font 'Verdana,20';"`
+            `"unset key;"`
             `"set title \"${printname}\";"`
    	    `"stats '${config1_log_sorted}' nooutput;"`
 	    `"set xrange [0:STATS_records+10];"`
@@ -151,12 +151,12 @@ function plot_two_configs_fine_benchmark()
 	    `"set palette maxcolors 2;"`
 	    `"set palette model RGB defined ( 0 '$color2', 1 '$color2' );"` # 0 should be red
 	    `"unset colorbox;"`
-            `"plot '${config1_log_sorted}' using 0:( strcol(1) eq \"dyn\" ? NaN : \$3 ) with points"` 
-            `"   pt 9 ps 3 lc rgb '$color1' title '${c1t}',"`
+            `"plot '${config1_log_sorted}' using 0:( strcol(1) eq \"dyn\" ? NaN : \$3 ) with points"`
+            `"   pt 9 ps 2 lc rgb '$color1' title '${c1t}',"`
             `"'${config2_log_sorted}' using 0:( strcol(1) eq \"dyn\" ? NaN : \$3 ):( \$8 > 50 ? 0 : 1 ) with points"`
-            `"   pt 6 ps 3 palette title '${c2t}',"`
+            `"   pt 6 ps 2 palette title '${c2t}',"`
             `"${static_mean} lw 2 dt 2 lc \"blue\" title 'Static Grift',"`
-            `"${dyn_mean} lw 2 dt 2 lc \"red\" title 'Dynamic Grift';"
+            `"${dyn_mean} lw 2 lt 1 lc \"red\" title 'Dynamic Grift';"
 
     # runtime casts count figure
     gnuplot -e "set datafile separator \",\";"`

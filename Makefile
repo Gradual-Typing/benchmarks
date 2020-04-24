@@ -1,4 +1,4 @@
-IMAGE_NAME=dalmahal90/grift-benchmarks:pldi19
+IMAGE_NAME=benchmarks
 CONTAINER_NAME=benchmarks_container
 HOST_EXPERIMENT_DIR=/home/$(USER)/experiments
 CONTAINER_EXPERIMENT_DIR=/app/experiments
@@ -82,6 +82,7 @@ attach:
 	docker run --rm -it --userns=host \
 		-v $(HOST_EXPERIMENT_DIR):$(CONTAINER_EXPERIMENT_DIR) \
 		--ulimit stack=-1 \
+		--cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
 		--name=$(CONTAINER_NAME) $(IMAGE_NAME) /bin/bash
 
 debug: build typed_racket_benchmarks/.git setup-dir attach

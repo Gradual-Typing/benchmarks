@@ -14,30 +14,34 @@ umask 000
 # $4 - aux name
 # $5 - static/dyn/partial
 # $6 - logfile full path
-write_grift_speedups()
+write_grift_runtimes_and_slowdowns()
 {
-    local baseline_system="$1"; shift
-    local name="$1";            shift
-    local benchmark_args="$1";  shift
-    local disk_aux_name="$1";   shift
-    local mode="$1";            shift # static or dyn
-    local logfile="$1";         shift
+    local baseline_system="$1";   shift
+    local name="$1";              shift
+    local benchmark_args="$1";    shift
+    local disk_aux_name="$1";     shift
+    local mode="$1";              shift # static or dyn
+    local runtimes_logfile="$1";  shift
+    local slowdowns_logfile="$1"; shift
 
     local benchmark_path=""
     if [ "$mode" = "static" ]; then
 	benchmark_path="${TMP_DIR}/${mode}/${name}/single/${name}"
     elif [ "$mode" = "dyn" ]; then
-	 benchmark_path="${TMP_DIR}/${mode}/${name}"
+	benchmark_path="${TMP_DIR}/${mode}/${name}"
     else
-	echo "invalid mode"
+	echo "invalid mode: ${mode}"
 	exit -1
     fi
 
     for config_index in ${CONFIGS[@]}; do
-        get_grift_speedup $baseline_system "$benchmark_path"\
-                          "$benchmark_args" "$disk_aux_name" $config_index
-        printf ",$RETURN" >> $logfile
-        echo "grift $config_index speedup: $RETURN"
+        get_grift_runtime "$benchmark_path" "$benchmark_args" "$disk_aux_name" \
+			  $config_index
+        printf ",$RETURN" >> $runtimes_logfile
+	get_grift_slowdown $baseline_system "$benchmark_path" "$benchmark_args" \
+			  "$disk_aux_name" $config_index
+	printf ",$RETURN" >> $slowdowns_logfile
+        echo "grift $config_index slowdown: $RETURN"
     done
 }
 
@@ -54,9 +58,12 @@ run_benchmark()
     local input_file="$1";              shift
     local aux_name="$1";                shift
 
-    local logfile1="${DATA_DIR}/static.log"
-    local logfile2="${DATA_DIR}/dyn.log"
-    local logfile3="${DATA_DIR}/partial.log"
+    local runtimes_static_logfile="${DATA_DIR}/static_runtimes.log"
+    local runtimes_dynamic_logfile="${DATA_DIR}/dyn_runtimes.log"
+    local runtimes_partial_logfile="${DATA_DIR}/partial_runtimes.log"
+    local slowdowns_static_logfile="${DATA_DIR}/static_slowdowns.log"
+    local slowdowns_dynamic_logfile="${DATA_DIR}/dyn_slowdowns.log"
+    local slowdowns_partial_logfile="${DATA_DIR}/partial_slowdowns.log"
 
     local disk_aux_name="" print_aux_name=""
     if [[ ! -z "${aux_name}" ]]; then
@@ -79,58 +86,72 @@ run_benchmark()
     fi
 
     # Record the runtime of Statically Typed Varients
-    printf "$name$print_aux_name" >> "$logfile1"
-    write_grift_speedups $baseline_system_static "$name" "$input_file"\
-                         "$disk_aux_name" static "$logfile1"
+    printf "$name$print_aux_name" >> "$runtimes_static_logfile"
+    printf "$name$print_aux_name" >> "$slowdowns_static_logfile"
+    write_grift_runtimes_and_slowdowns $baseline_system_static "$name" "$input_file"\
+                         "$disk_aux_name" static "$runtimes_static_logfile" "$slowdowns_static_logfile"
     # Typed Racket
-    printf "Typed Racket speedup: "
-    get_speedup typed_racket $baseline_system_static\
+    printf "Typed Racket slowdown: "
+    get_typed_racket_runtime "$name" "$input_file" "$disk_aux_name"
+    printf ",$RETURN" >> $runtimes_static_logfile
+    get_slowdown typed_racket $baseline_system_static\
                 "$name" "$input_file" "$disk_aux_name"
-    printf ",$RETURN" >> $logfile1
-    echo "$RETURN"
+    printf ",$RETURN" >> $slowdowns_static_logfile
+    echo "Typed Racket slowdown: $RETURN"
     
     # OCaml
-    get_speedup ocaml $baseline_system_static\
-                "$name" "$input_file" "$disk_aux_name"
-    printf ",$RETURN" >> $logfile1    
-    echo "OCaml speedup: $RETURN"
+    get_ocaml_runtime "$name" "$input_file" "$disk_aux_name"
+    printf ",$RETURN" >> $runtimes_static_logfile
+    get_slowdown ocaml $baseline_system_static\
+                 "$name" "$input_file" "$disk_aux_name"
+    printf ",$RETURN" >> $slowdowns_static_logfile
+    echo "OCaml slowdown: $RETURN"
 
     
-    printf "\n" >> "$logfile1"
-    printf "$name$print_aux_name" >> $logfile2
+    printf "\n" >> "$runtimes_static_logfile"
+    printf "\n" >> "$slowdowns_static_logfile"
+    printf "$name$print_aux_name" >> $runtimes_dynamic_logfile
+    printf "$name$print_aux_name" >> $slowdowns_dynamic_logfile
     
-    write_grift_speedups $baseline_system_dynamic "$name" "$input_file"\
-                         "$disk_aux_name" dyn "$logfile2"
+    write_grift_runtimes_and_slowdowns $baseline_system_dynamic "$name" "$input_file"\
+                         "$disk_aux_name" dyn "$runtimes_dynamic_logfile" "$slowdowns_dynamic_logfile"
 
-    # The systems to compare against
-    get_speedup gambit $baseline_system_dynamic\
+    # Gambit
+    get_gambit_runtime "$name" "$input_file" "$disk_aux_name"
+    printf ",$RETURN" >> $runtimes_dynamic_logfile
+    get_slowdown gambit $baseline_system_dynamic\
                 "$name" "$input_file" "$disk_aux_name"
-    printf ",$RETURN" >> $logfile2
-    echo "Gambit Speedup: $RETURN"
+    printf ",$RETURN" >> $slowdowns_dynamic_logfile
+    echo "Gambit Slowdown: $RETURN"
     
-    get_speedup chezscheme $baseline_system_dynamic\
+    get_chezscheme_runtime "$name" "$input_file" "$disk_aux_name"
+    printf ",$RETURN" >> $runtimes_dynamic_logfile
+    get_slowdown chezscheme $baseline_system_dynamic\
                 "$name" "$input_file" "$disk_aux_name"
-    printf ",$RETURN" >> $logfile2
-    echo "Chez speedup: $RETURN"
+    printf ",$RETURN" >> $slowdowns_dynamic_logfile
+    echo "Chez slowdown: $RETURN"
     
-    printf "\n" >> "$logfile2"
+    printf "\n" >> "$runtimes_dynamic_logfile"
+    printf "\n" >> "$slowdowns_dynamic_logfile"
 
     echo "finished ${name}${print_aux_name}"
 }
 
 # $1 - static or dyn
-gen_fig()
+gen_static_fig()
 {
-    local mode="$1"; shift
+    local mode="static"
     local sys="$1";  shift
     local outfile_name="$1"; shift
     local key_position="$1"; shift
     local ymin="$1"; shift
     local ymax="$1"; shift
 
-    local logfile="${DATA_DIR}/${mode}.log"
+    local runtimes_logfile="${DATA_DIR}/${mode}_runtimes.log"
+    local slowdowns_logfile="${DATA_DIR}/${mode}_slowdowns.log"
     local outfile="${OUT_DIR}/${outfile_name}.png"
-    local N=$(head -1 "${logfile}" | sed 's/[^,]//g' | wc -c)
+    local self_outfile="${OUT_DIR}/${outfile_name}_self.png"
+    local N=$(head -1 "${runtimes_logfile}" | sed 's/[^,]//g' | wc -c)
 
     rm -rf "$outfile"
     
@@ -139,22 +160,97 @@ gen_fig()
             `" noenhanced color font 'Verdana,26' ;"`
             `"set output '${outfile}';"`
                 `"set border 15 back;"`
-            `"set yrange [${ymin}:${ymax}];"`
-            `"set logscale y;"`
             `"set key font 'Verdana,20';"`
             `"set style data histogram;"`
             `"set style histogram cluster gap 1;"`
             `"set style fill pattern border -1;"`
             `"load '${LIB_DIR}/dark-colors.pal';"`
             `"set boxwidth 0.9;"` 
-            `"set ylabel \"  Speedup with respect to ${sys}\";"`
+            `"set ylabel \" Runtime in seconds\";"`
+            `"set title \"\";"`
+            `"set xtic rotate by -45 scale 0;"`
+            `"set grid ytics;"`
+            `"plot '${runtimes_logfile}' using 2:xtic(1) title col,"`
+            `"  for [i=3:$N] \"\" "`
+            `"using i title columnheader(i) ls (i-1)"
+
+    gnuplot -e "set datafile separator \",\";"`
+            `"set terminal pngcairo size 1280,960"`
+            `" noenhanced color font 'Verdana,26' ;"`
+            `"set output '${self_outfile}';"`
+            `"set border 15 back;"`
+            `"set yrange [0:2];"`
+            `"set key font 'Verdana,20';"`
+            `"set style data histogram;"`
+            `"set style histogram cluster gap 1;"`
+            `"set style fill pattern border -1;"`
+            `"load '${LIB_DIR}/dark-colors.pal';"`
+            `"set boxwidth 0.9;"` 
+            `"set ylabel \"  Slowdown with respect to ${sys}\";"`
             `"set title \"\";"`
             `"set xtic rotate by -45 scale 0;"`
             `"set grid ytics;"`
             `"set ytics add (\"1\" 1);"`
-            `"plot '${logfile}' using 2:xtic(1) title col,"`
+            `"plot '${slowdowns_logfile}' using 2:xtic(1) title col,"`
+            `"  for [i=3:4] \"\" "`
+            `"using i title columnheader(i) ls (i-1)"
+}
+
+# $1 - static or dyn
+gen_dynamic_fig()
+{
+    local mode="dyn"
+    local sys="$1";  shift
+    local outfile_name="$1"; shift
+    local key_position="$1"; shift
+    local ymin="$1"; shift
+    local ymax="$1"; shift
+
+    local runtimes_logfile="${DATA_DIR}/${mode}_runtimes.log"
+    local slowdowns_logfile="${DATA_DIR}/${mode}_slowdowns.log"
+    local outfile="${OUT_DIR}/${outfile_name}.png"
+    local self_outfile="${OUT_DIR}/${outfile_name}_self.png"
+    local N=$(head -1 "${runtimes_logfile}" | sed 's/[^,]//g' | wc -c)
+
+    rm -rf "$outfile"
+    
+    gnuplot -e "set datafile separator \",\";"`
+            `"set terminal pngcairo size 1280,960"`
+            `" noenhanced color font 'Verdana,26' ;"`
+            `"set output '${outfile}';"`
+                `"set border 15 back;"`
+            `"set key font 'Verdana,20';"`
+            `"set style data histogram;"`
+            `"set style histogram cluster gap 1;"`
+            `"set style fill pattern border -1;"`
+            `"load '${LIB_DIR}/dark-colors.pal';"`
+            `"set boxwidth 0.9;"` 
+            `"set ylabel \" Runtime in seconds\";"`
+            `"set title \"\";"`
+            `"set xtic rotate by -45 scale 0;"`
+            `"set grid ytics;"`
+            `"plot '${runtimes_logfile}' using 2:xtic(1) title col,"`
             `"  for [i=3:$N] \"\" "`
             `"using i title columnheader(i) ls (i-1)"
+
+    gnuplot -e "set datafile separator \",\";"`
+            `"set terminal pngcairo size 1280,960"`
+            `" noenhanced color font 'Verdana,26' ;"`
+            `"set output '${self_outfile}';"`
+            `"set border 15 back;"`
+            `"set yrange [0:3];"`
+            `"set key font 'Verdana,20';"`
+            `"set style data histogram;"`
+            `"set style histogram cluster gap 1;"`
+            `"set style fill pattern border -1;"`
+            `"load '${LIB_DIR}/dark-colors.pal';"`
+            `"set boxwidth 0.9;"` 
+            `"set ylabel \"  Slowdown with respect to ${sys}\";"`
+            `"set title \"\";"`
+            `"set xtic rotate by -45 scale 0;"`
+            `"set grid ytics;"`
+            `"set ytics add (\"1\" 1);"`
+            `"plot '${slowdowns_logfile}' using 2:xtic(1) title col"
 }
 
 
@@ -165,9 +261,12 @@ run_experiment()
     local baseline_system_static="$1";  shift
     local baseline_system_dynamic="$1"; shift
     
-    local logfile1="${DATA_DIR}/static.log"
-    local logfile2="${DATA_DIR}/dyn.log"
-    local logfile3="${DATA_DIR}/partial.log"
+    local runtimes_static_logfile="${DATA_DIR}/static_runtimes.log"
+    local runtimes_dynamic_logfile="${DATA_DIR}/dyn_runtimes.log"
+    local runtimes_partial_logfile="${DATA_DIR}/partial_runtimes.log"
+    local slowdowns_static_logfile="${DATA_DIR}/static_slowdowns.log"
+    local slowdowns_dynamic_logfile="${DATA_DIR}/dyn_slowdowns.log"
+    local slowdowns_partial_logfile="${DATA_DIR}/partial_slowdowns.log"
     
     local configs=( $CONFIGS )
     local configs_len=${#configs[@]}
@@ -176,27 +275,30 @@ run_experiment()
     then
     local config_str="Grift"
     else
-    local config_str=$(grift-configs --name-end " Grift" --names $CONFIGS)
+    local config_str=$(grift-configs --name-sep " + " --names $CONFIGS)
     fi    
     
     local shared_str=$(grift-configs --name-sep "_" --common $CONFIGS)
     
-    echo "name,${config_str},Typed-Racket,OCaml" > "$logfile1"
-    echo "name,${config_str},Gambit,Chez Scheme" > "$logfile2"
-    echo "name,${config_str}" > "$logfile3"
+    echo "name,${config_str},Typed-Racket,OCaml" > "$runtimes_static_logfile"
+    echo "name,${config_str},Gambit,Chez Scheme" > "$runtimes_dynamic_logfile"
+    echo "name,${config_str}" > "$runtimes_partial_logfile"
+    echo "name,${config_str},Typed-Racket,OCaml" > "$slowdowns_static_logfile"
+    echo "name,${config_str},Gambit,Chez Scheme" > "$slowdowns_dynamic_logfile"
+    echo "name,${config_str}" > "$slowdowns_partial_logfile"
 
     for ((i=0;i<${#BENCHMARKS_ARGS_EXTERNAL[@]};++i)); do
 	run_benchmark $baseline_system_static $baseline_system_dynamic\
                       "${BENCHMARKS[i]}" "${BENCHMARKS_ARGS_EXTERNAL[i]}" ""
     done
 
-    local gmlog1=$(racket "${LIB_DIR}/geometric-mean.rkt" $logfile1)
-    local gmlog2=$(racket "${LIB_DIR}/geometric-mean.rkt" $logfile2)
-    echo "$gmlog1" > $logfile1
-    echo "$gmlog2" > $logfile2
+    local gmlog1=$(racket "${LIB_DIR}/geometric-mean.rkt" $slowdowns_static_logfile)
+    local gmlog2=$(racket "${LIB_DIR}/geometric-mean.rkt" $slowdowns_dynamic_logfile)
+    echo "$gmlog1" > $slowdowns_static_logfile
+    echo "$gmlog2" > $slowdowns_dynamic_logfile
 
-    gen_fig static "Static Grift" "${shared_str}_static" "right" "" ""
-    gen_fig dyn Racket "${shared_str}_dynamic" "right" "" ""
+    gen_static_fig "Static Grift" "${shared_str}_static" "right" "" ""
+    gen_dynamic_fig "Proxied" "${shared_str}_dynamic" "right" "" ""
 }
 
 main()
@@ -289,7 +391,7 @@ main()
         printf "loops:\t\t:%s\n" "$LOOPS" >> "$PARAMS_LOG"
     fi
 
-    run_experiment get_static_grift_runtime get_racket_runtime
+    run_experiment get_static_grift_runtime get_dyn_grift_17_runtime
     echo "done."
 }
 

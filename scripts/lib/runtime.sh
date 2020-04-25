@@ -204,7 +204,7 @@ get_grift_runtime()
     if [ -f $cache_file ]; then
         RETURN=$(cat "$cache_file")
     else
-        grift-bench --config $config_index --keep-c "c${config_index}.c" "${benchmark_path}.grift"
+        grift-bench --config $config_index --keep-c "${benchmark_path}_${config_index}.c" "${benchmark_path}.grift"
         avg "${benchmark_path}.o${config_index}"\
             "${INPUT_DIR}/${benchmark}/${input}"\
             "static" "${OUTPUT_DIR}/static/${benchmark}/${input}"\
